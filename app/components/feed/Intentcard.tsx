@@ -2,13 +2,14 @@
 
 import "./intentcard.css";
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Users, MessageCircle, MapPin, Clock, X, Send } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 interface IntentCardProps {
   id: string;
   statement: string;
-  category: string | string[];   // ← accepts both for backwards compat
+  category: string | string[];
   location: string | null;
   expiresAt: Date;
   responseCount: number;
@@ -34,7 +35,6 @@ export default function IntentCard({
 }: IntentCardProps) {
   const { data: session } = useSession();
 
-  // Normalise to array always
   const categories = Array.isArray(category) ? category : [category];
 
   const [timeLeft,      setTimeLeft]      = useState<string>("");
@@ -47,25 +47,28 @@ export default function IntentCard({
   const [threadLoading, setThreadLoading] = useState<boolean>(false);
   const [message,       setMessage]       = useState<string>("");
   const [sending,       setSending]       = useState<boolean>(false);
+  const [mounted,       setMounted]       = useState<boolean>(false);
 
+  // Needed for createPortal — only runs client-side
+  useEffect(() => { setMounted(true); }, []);
+
+  // ── Countdown ────────────────────────────────────────────────
   useEffect(() => {
     const updateTime = () => {
       const now      = Date.now();
       const distance = new Date(expiresAt).getTime() - now;
-
       if (distance <= 0) { setTimeLeft("Expired"); setIsUrgent(false); return; }
-
       const hours   = Math.floor(distance / (1000 * 60 * 60));
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       setIsUrgent(hours < 2);
       setTimeLeft(hours < 1 ? `${minutes}m` : `${hours}h ${minutes}m`);
     };
-
     updateTime();
     const interval = setInterval(updateTime, 60000);
     return () => clearInterval(interval);
   }, [expiresAt]);
 
+  // ── "Also Looking" ───────────────────────────────────────────
   const handleAlsoLooking = async () => {
     if (!session?.user || alsoJoined || alsoLoading) return;
     setAlsoLoading(true);
@@ -83,6 +86,7 @@ export default function IntentCard({
     }
   };
 
+  // ── Open thread ──────────────────────────────────────────────
   const openThread = async () => {
     setThreadOpen(true);
     setThreadLoading(true);
@@ -97,6 +101,7 @@ export default function IntentCard({
     }
   };
 
+  // ── Send message — allows multiple per user ──────────────────
   const handleSend = async () => {
     if (!message.trim() || !session?.user || sending) return;
     setSending(true);
@@ -119,13 +124,83 @@ export default function IntentCard({
     }
   };
 
+  // ── Thread drawer JSX — portalled to body ────────────────────
+  const drawer = threadOpen && mounted ? createPortal(
+    <div className="icard-overlay" onClick={() => setThreadOpen(false)}>
+      <div className="icard-drawer" onClick={e => e.stopPropagation()}>
+
+        <div className="icard-drawer-header">
+          <div>
+            <div className="icard-drawer-cats">
+              {categories.map(cat => (
+                <span key={cat} className="icard-category-pill">{cat}</span>
+              ))}
+            </div>
+            <p className="icard-drawer-statement">{statement}</p>
+          </div>
+          <button className="icard-drawer-close" onClick={() => setThreadOpen(false)}>
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="icard-drawer-divider" />
+
+        <div className="icard-drawer-messages">
+          {threadLoading ? (
+            <div className="icard-drawer-loading">
+              <div className="icard-drawer-spinner" />
+            </div>
+          ) : responses.length === 0 ? (
+            <p className="icard-drawer-empty">No responses yet. Be the first.</p>
+          ) : (
+            responses.map(r => (
+              <div key={r.id} className="icard-msg">
+                <div className="icard-msg-avatar">
+                  {(r.username?.[0] ?? "?").toUpperCase()}
+                </div>
+                <div className="icard-msg-body">
+                  <span className="icard-msg-username">{r.username}</span>
+                  <p className="icard-msg-text">{r.message}</p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {session?.user ? (
+          <div className="icard-drawer-input-row">
+            <input
+              className="icard-drawer-input"
+              placeholder="Write a response…"
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSend()}
+            />
+            <button
+              className="icard-drawer-send"
+              onClick={handleSend}
+              disabled={sending || !message.trim()}
+            >
+              <Send size={15} />
+            </button>
+          </div>
+        ) : (
+          <p className="icard-drawer-login">
+            <a href="/login">Log in</a> to respond
+          </p>
+        )}
+
+      </div>
+    </div>,
+    document.body
+  ) : null;
+
   return (
     <>
       <div className="icard">
 
         {/* ── Top row ── */}
         <div className="icard-top">
-          {/* Multi-category pills */}
           <div className="icard-categories">
             {categories.map(cat => (
               <span key={cat} className="icard-category-pill">{cat}</span>
@@ -173,73 +248,8 @@ export default function IntentCard({
 
       </div>
 
-      {/* ── Thread Drawer ── */}
-      {threadOpen && (
-        <div className="icard-overlay" onClick={() => setThreadOpen(false)}>
-          <div className="icard-drawer" onClick={e => e.stopPropagation()}>
-            <div className="icard-drawer-header">
-              <div>
-                <div className="icard-drawer-cats">
-                  {categories.map(cat => (
-                    <span key={cat} className="icard-category-pill">{cat}</span>
-                  ))}
-                </div>
-                <p className="icard-drawer-statement">{statement}</p>
-              </div>
-              <button className="icard-drawer-close" onClick={() => setThreadOpen(false)}>
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="icard-drawer-divider" />
-
-            <div className="icard-drawer-messages">
-              {threadLoading ? (
-                <div className="icard-drawer-loading">
-                  <div className="icard-drawer-spinner" />
-                </div>
-              ) : responses.length === 0 ? (
-                <p className="icard-drawer-empty">No responses yet. Be the first.</p>
-              ) : (
-                responses.map(r => (
-                  <div key={r.id} className="icard-msg">
-                    <div className="icard-msg-avatar">
-                      {(r.username?.[0] ?? "?").toUpperCase()}
-                    </div>
-                    <div className="icard-msg-body">
-                      <span className="icard-msg-username">{r.username}</span>
-                      <p className="icard-msg-text">{r.message}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {session?.user ? (
-              <div className="icard-drawer-input-row">
-                <input
-                  className="icard-drawer-input"
-                  placeholder="Write a response…"
-                  value={message}
-                  onChange={e => setMessage(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleSend()}
-                />
-                <button
-                  className="icard-drawer-send"
-                  onClick={handleSend}
-                  disabled={sending || !message.trim()}
-                >
-                  <Send size={15} />
-                </button>
-              </div>
-            ) : (
-              <p className="icard-drawer-login">
-                <a href="/login">Log in</a> to respond
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Drawer portalled to document.body — no layout interference */}
+      {drawer}
     </>
   );
 }
