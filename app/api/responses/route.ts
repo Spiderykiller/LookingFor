@@ -41,13 +41,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ── Only block duplicate "Also looking" — NOT regular messages ──
-    if (message.trim() === "Also looking") {
+    const trimmed = message.trim();
+
+    // Only block duplicate CTA responses — regular messages always allowed
+    const isCta = trimmed === "Also Looking" || trimmed === "Also Offering";
+    if (isCta) {
       const existing = await sql`
         SELECT id FROM responses
         WHERE intent_id = ${intent_id}
           AND user_id   = ${session.user.id}
-          AND message   = 'Also looking'
+          AND message   IN ('Also Looking', 'Also Offering')
         LIMIT 1
       `;
       if (existing.length > 0) {
@@ -55,10 +58,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Regular messages always allowed — no duplicate check
     const result = await sql`
       INSERT INTO responses (intent_id, user_id, message)
-      VALUES (${intent_id}, ${session.user.id}, ${message.trim()})
+      VALUES (${intent_id}, ${session.user.id}, ${trimmed})
       RETURNING id, user_id, message, created_at
     `;
 

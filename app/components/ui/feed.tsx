@@ -7,7 +7,7 @@ import IntentCard from "../feed/Intentcard";
 export interface FeedItem {
   id: string;
   statement: string;
-  category: string | string[];   // ← accepts both for backwards compat
+  category: string | string[];
   location: string | null;
   expiresAt: Date;
   createdAt: Date;
@@ -30,24 +30,18 @@ export default function Feed({ items, isLoading = false }: FeedProps) {
     });
   }, [items]);
 
-  /* ── Skeleton loader ──────────────────────────────────────── */
   if (isLoading) {
     return (
       <section className="feed-section">
         <div className="feed-grid">
           {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="feed-skeleton"
-              style={{ animationDelay: `${i * 80}ms` }}
-            />
+            <div key={i} className="feed-skeleton" style={{ animationDelay: `${i * 80}ms` }} />
           ))}
         </div>
       </section>
     );
   }
 
-  /* ── Empty state ──────────────────────────────────────────── */
   if (sortedItems.length === 0) {
     return (
       <section className="feed-section">
@@ -60,7 +54,6 @@ export default function Feed({ items, isLoading = false }: FeedProps) {
     );
   }
 
-  /* ── Feed grid ────────────────────────────────────────────── */
   return (
     <section className="feed-section">
       <div className="feed-grid">
@@ -78,6 +71,7 @@ export default function Feed({ items, isLoading = false }: FeedProps) {
               expiresAt={item.expiresAt}
               responseCount={item.responseCount}
               username={item.username}
+              mode={item.mode}          // ← now passed down
             />
           </div>
         ))}

@@ -14,6 +14,7 @@ interface IntentCardProps {
   expiresAt: Date;
   responseCount: number;
   username?: string;
+  mode?: "looking" | "offering";   // ← added
 }
 
 interface Response {
@@ -32,10 +33,12 @@ export default function IntentCard({
   expiresAt,
   responseCount,
   username = "Anonymous",
+  mode = "looking",               // ← added
 }: IntentCardProps) {
   const { data: session } = useSession();
 
   const categories = Array.isArray(category) ? category : [category];
+  const ctaLabel   = mode === "offering" ? "Also Offering" : "Also Looking";
 
   const [timeLeft,      setTimeLeft]      = useState<string>("");
   const [isUrgent,      setIsUrgent]      = useState<boolean>(false);
@@ -49,10 +52,8 @@ export default function IntentCard({
   const [sending,       setSending]       = useState<boolean>(false);
   const [mounted,       setMounted]       = useState<boolean>(false);
 
-  // Needed for createPortal — only runs client-side
   useEffect(() => { setMounted(true); }, []);
 
-  // ── Countdown ────────────────────────────────────────────────
   useEffect(() => {
     const updateTime = () => {
       const now      = Date.now();
@@ -68,7 +69,6 @@ export default function IntentCard({
     return () => clearInterval(interval);
   }, [expiresAt]);
 
-  // ── "Also Looking" ───────────────────────────────────────────
   const handleAlsoLooking = async () => {
     if (!session?.user || alsoJoined || alsoLoading) return;
     setAlsoLoading(true);
@@ -76,7 +76,7 @@ export default function IntentCard({
       const res = await fetch("/api/responses", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ intent_id: id, message: "Also looking" }),
+        body:    JSON.stringify({ intent_id: id, message: ctaLabel }),
       });
       if (res.ok) { setAlsoJoined(true); setCount(c => c + 1); }
     } catch (err) {
@@ -86,7 +86,6 @@ export default function IntentCard({
     }
   };
 
-  // ── Open thread ──────────────────────────────────────────────
   const openThread = async () => {
     setThreadOpen(true);
     setThreadLoading(true);
@@ -101,30 +100,35 @@ export default function IntentCard({
     }
   };
 
-  // ── Send message — allows multiple per user ──────────────────
   const handleSend = async () => {
     if (!message.trim() || !session?.user || sending) return;
+
+    const text = message.trim();
+    setMessage("");        // clear input immediately so user can type next message
     setSending(true);
+
     try {
       const res = await fetch("/api/responses", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ intent_id: id, message: message.trim() }),
+        body:    JSON.stringify({ intent_id: id, message: text }),
       });
       if (res.ok) {
         const newResponse = await res.json();
         setResponses(prev => [...prev, newResponse]);
         setCount(c => c + 1);
-        setMessage("");
+      } else {
+        // Put message back if send failed
+        setMessage(text);
       }
     } catch (err) {
       console.error("Failed to send:", err);
+      setMessage(text);   // restore on error too
     } finally {
       setSending(false);
     }
   };
 
-  // ── Thread drawer JSX — portalled to body ────────────────────
   const drawer = threadOpen && mounted ? createPortal(
     <div className="icard-overlay" onClick={() => setThreadOpen(false)}>
       <div className="icard-drawer" onClick={e => e.stopPropagation()}>
@@ -174,7 +178,12 @@ export default function IntentCard({
               placeholder="Write a response…"
               value={message}
               onChange={e => setMessage(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSend()}
+              onKeyDown={e => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
             />
             <button
               className="icard-drawer-send"
@@ -199,7 +208,6 @@ export default function IntentCard({
     <>
       <div className="icard">
 
-        {/* ── Top row ── */}
         <div className="icard-top">
           <div className="icard-categories">
             {categories.map(cat => (
@@ -209,10 +217,8 @@ export default function IntentCard({
           <span className="icard-username">{username}</span>
         </div>
 
-        {/* ── Statement ── */}
         <p className="icard-statement">{statement}</p>
 
-        {/* ── Meta ── */}
         <div className="icard-meta">
           <div className="icard-location">
             <MapPin size={12} strokeWidth={2} />
@@ -226,7 +232,6 @@ export default function IntentCard({
 
         <div className="icard-divider" />
 
-        {/* ── Footer ── */}
         <div className="icard-footer">
           <div className="icard-stats">
             <button className="icard-stat-btn">
@@ -242,13 +247,12 @@ export default function IntentCard({
             onClick={handleAlsoLooking}
             disabled={alsoLoading || alsoJoined || !session?.user}
           >
-            {alsoJoined ? "✓ Joined" : alsoLoading ? "…" : "Also Looking"}
+            {alsoJoined ? "✓ Joined" : alsoLoading ? "…" : ctaLabel}
           </button>
         </div>
 
       </div>
 
-      {/* Drawer portalled to document.body — no layout interference */}
       {drawer}
     </>
   );
