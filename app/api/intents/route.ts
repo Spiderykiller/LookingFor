@@ -58,6 +58,15 @@ export async function POST(req: Request) {
       );
     }
 
+    // ✅ Normalise category to array and validate it's not empty
+    const categoryArray = Array.isArray(category) ? category : [category];
+    if (categoryArray.length === 0) {
+      return NextResponse.json(
+        { error: "Select at least one category" },
+        { status: 400 }
+      );
+    }
+
     const expiresAt = new Date(
       Date.now() + duration * 60 * 60 * 1000
     );
@@ -78,7 +87,7 @@ export async function POST(req: Request) {
         ${session.user.id},
         ${mode},
         ${statement.trim()},
-        ${category},
+        ${categoryArray},
         ${Array.isArray(tags) ? tags : []},
         ${duration},
         ${location?.trim() || null},

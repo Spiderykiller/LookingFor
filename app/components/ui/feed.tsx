@@ -7,7 +7,7 @@ import IntentCard from "../feed/Intentcard";
 export interface FeedItem {
   id: string;
   statement: string;
-  category: string;
+  category: string | string[];   // ← accepts both for backwards compat
   location: string | null;
   expiresAt: Date;
   createdAt: Date;

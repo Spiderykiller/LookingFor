@@ -285,7 +285,7 @@ export default function ProfilePage() {
   const isLocalUser = user.provider === "local";
 
   return (
-    <div className="profile-container">
+    <div className="profile-container pb-20">
       <div className="profile-ambientGlow" />
 
       {/* ── Edit Profile Modal ── */}

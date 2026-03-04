@@ -2,6 +2,7 @@
 
 import "./post.css";
 import { useState, useRef, useEffect } from "react";
+import { Check } from "lucide-react";
 
 const CATEGORIES = [
   { label: "Work",      icon: "💼" },
@@ -32,31 +33,38 @@ const DURATION_OPTIONS = [
 type Mode = "looking" | "offering";
 
 export default function PostPage() {
-  const [mode,             setMode]             = useState<Mode>("looking");
-  const [statement,        setStatement]        = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [tags,             setTags]             = useState<string[]>([]);
-  const [tagInput,         setTagInput]         = useState<string>("");
-  const [duration,         setDuration]         = useState<number>(48);
-  const [location,         setLocation]         = useState<string>("");
-  const [submitted,        setSubmitted]        = useState<boolean>(false);
-  const [animating,        setAnimating]        = useState<boolean>(false);
-  const [error,            setError]            = useState<string | null>(null);
-  const [charCount,        setCharCount]        = useState<number>(0);
+  const [mode,               setMode]               = useState<Mode>("looking");
+  const [statement,          setStatement]          = useState<string>("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);  // ← now array
+  const [tags,               setTags]               = useState<string[]>([]);
+  const [tagInput,           setTagInput]           = useState<string>("");
+  const [duration,           setDuration]           = useState<number>(48);
+  const [location,           setLocation]           = useState<string>("");
+  const [submitted,          setSubmitted]          = useState<boolean>(false);
+  const [animating,          setAnimating]          = useState<boolean>(false);
+  const [error,              setError]              = useState<string | null>(null);
+  const [charCount,          setCharCount]          = useState<number>(0);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const MAX_CHARS   = 200;
 
-  useEffect(() => {
-    setCharCount(statement.length);
-  }, [statement]);
+  useEffect(() => { setCharCount(statement.length); }, [statement]);
 
   const circumference = 2 * Math.PI * 16;
   const dashOffset    = circumference - (charCount / MAX_CHARS) * circumference;
   const isNearLimit   = charCount > MAX_CHARS * 0.9;
-  const isReady       = statement.trim().length > 0 && selectedCategory !== null && !animating;
+  const isReady       = statement.trim().length > 0 && selectedCategories.length > 0 && !animating;
 
   const selectedDurationLabel = DURATION_OPTIONS.find((d) => d.value === duration)?.label;
+
+  // ── Toggle a category on/off ─────────────────────────────────
+  const toggleCategory = (label: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(label)
+        ? prev.filter(c => c !== label)
+        : [...prev, label]
+    );
+  };
 
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
@@ -75,19 +83,19 @@ export default function PostPage() {
   const removeTag = (tag: string) => setTags(tags.filter((t) => t !== tag));
 
   const handleSubmit = async () => {
-    if (!statement.trim() || !selectedCategory || animating) return;
+    if (!statement.trim() || selectedCategories.length === 0 || animating) return;
 
     setAnimating(true);
     setError(null);
 
     try {
       const res = await fetch("/api/intents", {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mode,
           statement,
-          category: selectedCategory,
+          category: selectedCategories,   // ← send array
           tags,
           duration,
           location,
@@ -113,7 +121,7 @@ export default function PostPage() {
   const resetForm = () => {
     setSubmitted(false);
     setStatement("");
-    setSelectedCategory(null);
+    setSelectedCategories([]);
     setTags([]);
     setTagInput("");
     setDuration(48);
@@ -135,13 +143,13 @@ export default function PostPage() {
             <span className="accentText">{selectedDurationLabel}</span>
           </p>
           <div className="successMeta">
-            <span className="metaBadge">{selectedCategory}</span>
+            {selectedCategories.map(cat => (
+              <span key={cat} className="metaBadge">{cat}</span>
+            ))}
             <span className="metaBadge">
               {mode === "looking" ? "Looking" : "Offering"}
             </span>
-            {location && (
-              <span className="metaBadge">📍 {location}</span>
-            )}
+            {location && <span className="metaBadge">📍 {location}</span>}
           </div>
           <button className="newPostBtn" onClick={resetForm}>
             Post Another Intent
@@ -153,7 +161,7 @@ export default function PostPage() {
 
   /* ── Main form ──────────────────────────────────────────── */
   return (
-    <div className="postContainer">
+    <div className="postContainer pb-20">
       <div className="ambientGlow" />
 
       {/* Page header */}
@@ -230,21 +238,35 @@ export default function PostPage() {
           </div>
         </div>
 
-        {/* Category */}
+        {/* Category — multi-select */}
         <div className="sectionBlock">
-          <p className="sectionTitle">CATEGORY</p>
-          <div className="categoryGrid">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.label}
-                onClick={() => setSelectedCategory(cat.label)}
-                className={`categoryBtn${selectedCategory === cat.label ? " active" : ""}`}
-              >
-                <span className="catIcon">{cat.icon}</span>
-                {cat.label}
-              </button>
-            ))}
+          <div className="sectionTitleRow">
+            <p className="sectionTitle">CATEGORY</p>
+            {selectedCategories.length > 0 && (
+              <span className="sectionCount">{selectedCategories.length} selected</span>
+            )}
           </div>
+          <div className="categoryGrid">
+            {CATEGORIES.map((cat) => {
+              const isActive = selectedCategories.includes(cat.label);
+              return (
+                <button
+                  key={cat.label}
+                  onClick={() => toggleCategory(cat.label)}
+                  className={`categoryBtn${isActive ? " active" : ""}`}
+                >
+                  {isActive && (
+                    <span className="categoryCheck"><Check size={10} strokeWidth={3} /></span>
+                  )}
+                  <span className="catIcon">{cat.icon}</span>
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+          {selectedCategories.length === 0 && (
+            <p className="categoryHint">Select at least one category</p>
+          )}
         </div>
 
         {/* Duration */}
@@ -285,9 +307,7 @@ export default function PostPage() {
             {tags.map((tag) => (
               <span key={tag} className="tag">
                 #{tag}
-                <button className="tagRemove" onClick={() => removeTag(tag)}>
-                  ×
-                </button>
+                <button className="tagRemove" onClick={() => removeTag(tag)}>×</button>
               </span>
             ))}
             {tags.length < 5 && (
@@ -304,12 +324,8 @@ export default function PostPage() {
           <p className="tagHint">Press Enter or comma to add · Max 5 tags</p>
         </div>
 
-        {/* Error message */}
-        {error && (
-          <div className="errorBanner">
-            ⚠️ {error}
-          </div>
-        )}
+        {/* Error */}
+        {error && <div className="errorBanner">⚠️ {error}</div>}
 
         {/* Submit */}
         <button

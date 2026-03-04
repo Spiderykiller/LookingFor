@@ -496,3 +496,39 @@
   .visibilityRow { flex-direction: column; }
   .durationBtn   { padding: 6px 12px; font-size: 12px; }
 }
+
+
+
+/* ── Add to post.css ── */
+
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sectionCount {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: rgba(228, 87, 46, 0.1);
+  border: 1px solid rgba(228, 87, 46, 0.25);
+  border-radius: 20px;
+  padding: 2px 10px;
+}
+
+.categoryCheck {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 3px;
+  color: inherit;
+}
+
+.categoryHint {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--subtle);
+  margin-top: 8px;
+}

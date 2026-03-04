@@ -5,7 +5,6 @@ import Navbar from "./components/ui/Navbar";
 import RoleToggle from "./components/ui/Roletoggle";
 import CategoryFilter from "./components/ui/Categoryfliter";
 import Feed, { FeedItem } from "./components/ui/feed";
-import BottomNav from "./components/ui/Bottomnav";
 import { useIntentStore } from "@/store/useIntentstore";
 
 export default function Home() {
@@ -14,7 +13,6 @@ export default function Home() {
 
   const { mode, category } = useIntentStore();
 
-  // ── Fetch all intents from DB ────────────────────────────────
   useEffect(() => {
     async function fetchFeed() {
       try {
@@ -26,7 +24,7 @@ export default function Home() {
         const mapped: FeedItem[] = data.map((item: any) => ({
           id:            item.id,
           statement:     item.statement,
-          category:      item.category,
+          category:      Array.isArray(item.category) ? item.category : [item.category],
           location:      item.location ?? null,
           expiresAt:     new Date(item.expires_at),
           createdAt:     new Date(item.created_at),
@@ -46,13 +44,18 @@ export default function Home() {
     fetchFeed();
   }, []);
 
-  // ── Apply RoleToggle + CategoryFilter from Zustand store ─────
   const filteredItems = useMemo(() => {
     return items.filter(item => {
-      const modeMatch     = mode === "LOOKING"
+      const modeMatch = mode === "LOOKING"
         ? item.mode === "looking"
         : item.mode === "offering";
-      const categoryMatch = category === null || item.category === category;
+
+      // category is now an array — match if ANY category matches the filter
+      const categoryMatch = category === null
+        || (Array.isArray(item.category)
+          ? item.category.includes(category)
+          : item.category === category);
+
       return modeMatch && categoryMatch;
     });
   }, [items, mode, category]);
@@ -63,7 +66,6 @@ export default function Home() {
       <RoleToggle />
       <CategoryFilter />
       <Feed items={filteredItems} isLoading={isLoading} />
-      <BottomNav />
     </main>
   );
 }

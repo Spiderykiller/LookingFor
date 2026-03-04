@@ -7,6 +7,8 @@ export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
 
+  if (pathname === "/login" || pathname === "/signup") return null;
+  
   const navItems = [
     {
       label: "Feed",

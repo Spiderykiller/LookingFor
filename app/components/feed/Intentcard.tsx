@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 interface IntentCardProps {
   id: string;
   statement: string;
-  category: string;
+  category: string | string[];   // ← accepts both for backwards compat
   location: string | null;
   expiresAt: Date;
   responseCount: number;
@@ -34,34 +34,29 @@ export default function IntentCard({
 }: IntentCardProps) {
   const { data: session } = useSession();
 
+  // Normalise to array always
+  const categories = Array.isArray(category) ? category : [category];
+
   const [timeLeft,      setTimeLeft]      = useState<string>("");
   const [isUrgent,      setIsUrgent]      = useState<boolean>(false);
   const [count,         setCount]         = useState<number>(responseCount);
   const [alsoLoading,   setAlsoLoading]   = useState<boolean>(false);
   const [alsoJoined,    setAlsoJoined]    = useState<boolean>(false);
-
-  // Thread drawer
   const [threadOpen,    setThreadOpen]    = useState<boolean>(false);
   const [responses,     setResponses]     = useState<Response[]>([]);
   const [threadLoading, setThreadLoading] = useState<boolean>(false);
   const [message,       setMessage]       = useState<string>("");
   const [sending,       setSending]       = useState<boolean>(false);
 
-  // ── Countdown ────────────────────────────────────────────────
   useEffect(() => {
     const updateTime = () => {
       const now      = Date.now();
       const distance = new Date(expiresAt).getTime() - now;
 
-      if (distance <= 0) {
-        setTimeLeft("Expired");
-        setIsUrgent(false);
-        return;
-      }
+      if (distance <= 0) { setTimeLeft("Expired"); setIsUrgent(false); return; }
 
       const hours   = Math.floor(distance / (1000 * 60 * 60));
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-
       setIsUrgent(hours < 2);
       setTimeLeft(hours < 1 ? `${minutes}m` : `${hours}h ${minutes}m`);
     };
@@ -71,26 +66,16 @@ export default function IntentCard({
     return () => clearInterval(interval);
   }, [expiresAt]);
 
-  // ── "Also Looking" ───────────────────────────────────────────
   const handleAlsoLooking = async () => {
-    if (!session?.user) return;
-    if (alsoJoined || alsoLoading) return;
-
+    if (!session?.user || alsoJoined || alsoLoading) return;
     setAlsoLoading(true);
     try {
       const res = await fetch("/api/responses", {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          intent_id: id,
-          message:   "Also looking",
-        }),
+        body:    JSON.stringify({ intent_id: id, message: "Also looking" }),
       });
-
-      if (res.ok) {
-        setAlsoJoined(true);
-        setCount(c => c + 1);
-      }
+      if (res.ok) { setAlsoJoined(true); setCount(c => c + 1); }
     } catch (err) {
       console.error("Failed to respond:", err);
     } finally {
@@ -98,7 +83,6 @@ export default function IntentCard({
     }
   };
 
-  // ── Open thread & load responses ─────────────────────────────
   const openThread = async () => {
     setThreadOpen(true);
     setThreadLoading(true);
@@ -113,21 +97,15 @@ export default function IntentCard({
     }
   };
 
-  // ── Send a message in the thread ─────────────────────────────
   const handleSend = async () => {
     if (!message.trim() || !session?.user || sending) return;
-
     setSending(true);
     try {
       const res = await fetch("/api/responses", {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          intent_id: id,
-          message:   message.trim(),
-        }),
+        body:    JSON.stringify({ intent_id: id, message: message.trim() }),
       });
-
       if (res.ok) {
         const newResponse = await res.json();
         setResponses(prev => [...prev, newResponse]);
@@ -135,7 +113,7 @@ export default function IntentCard({
         setMessage("");
       }
     } catch (err) {
-      console.error("Failed to send message:", err);
+      console.error("Failed to send:", err);
     } finally {
       setSending(false);
     }
@@ -147,7 +125,12 @@ export default function IntentCard({
 
         {/* ── Top row ── */}
         <div className="icard-top">
-          <span className="icard-label">{category} —</span>
+          {/* Multi-category pills */}
+          <div className="icard-categories">
+            {categories.map(cat => (
+              <span key={cat} className="icard-category-pill">{cat}</span>
+            ))}
+          </div>
           <span className="icard-username">{username}</span>
         </div>
 
@@ -166,25 +149,19 @@ export default function IntentCard({
           </div>
         </div>
 
-        {/* ── Divider ── */}
         <div className="icard-divider" />
 
         {/* ── Footer ── */}
         <div className="icard-footer">
           <div className="icard-stats">
-            {/* Response count */}
             <button className="icard-stat-btn">
               <Users size={14} strokeWidth={2} />
               <span>{count}</span>
             </button>
-
-            {/* Open thread */}
             <button className="icard-stat-btn" onClick={openThread}>
               <MessageCircle size={14} strokeWidth={2} />
             </button>
           </div>
-
-          {/* Also Looking CTA */}
           <button
             className={`icard-cta${alsoJoined ? " joined" : ""}`}
             onClick={handleAlsoLooking}
@@ -200,33 +177,29 @@ export default function IntentCard({
       {threadOpen && (
         <div className="icard-overlay" onClick={() => setThreadOpen(false)}>
           <div className="icard-drawer" onClick={e => e.stopPropagation()}>
-
-            {/* Drawer header */}
             <div className="icard-drawer-header">
               <div>
-                <p className="icard-drawer-label">{category} —</p>
+                <div className="icard-drawer-cats">
+                  {categories.map(cat => (
+                    <span key={cat} className="icard-category-pill">{cat}</span>
+                  ))}
+                </div>
                 <p className="icard-drawer-statement">{statement}</p>
               </div>
-              <button
-                className="icard-drawer-close"
-                onClick={() => setThreadOpen(false)}
-              >
+              <button className="icard-drawer-close" onClick={() => setThreadOpen(false)}>
                 <X size={16} />
               </button>
             </div>
 
             <div className="icard-drawer-divider" />
 
-            {/* Responses list */}
             <div className="icard-drawer-messages">
               {threadLoading ? (
                 <div className="icard-drawer-loading">
                   <div className="icard-drawer-spinner" />
                 </div>
               ) : responses.length === 0 ? (
-                <p className="icard-drawer-empty">
-                  No responses yet. Be the first.
-                </p>
+                <p className="icard-drawer-empty">No responses yet. Be the first.</p>
               ) : (
                 responses.map(r => (
                   <div key={r.id} className="icard-msg">
@@ -242,7 +215,6 @@ export default function IntentCard({
               )}
             </div>
 
-            {/* Input */}
             {session?.user ? (
               <div className="icard-drawer-input-row">
                 <input
@@ -265,7 +237,6 @@ export default function IntentCard({
                 <a href="/login">Log in</a> to respond
               </p>
             )}
-
           </div>
         </div>
       )}
