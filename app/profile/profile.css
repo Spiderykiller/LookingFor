@@ -1,0 +1,911 @@
+/*
+  profile.css — styles for app/profile/page.tsx
+  All design tokens and keyframes live in globals.css
+*/
+
+/* ─── Container ─────────────────────────────────────────────── */
+.profile-container {
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 32px 20px 100px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ─── Ambient glow ──────────────────────────────────────────── */
+.profile-ambientGlow {
+  position: fixed;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(228, 87, 46, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: glowPulse 5s ease-in-out infinite;
+}
+
+/* ─── Page header ───────────────────────────────────────────── */
+.profile-header {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 28px;
+  animation: fadeSlideUp 0.4s ease both;
+}
+
+.profile-header-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.profile-header-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.profile-accent {
+  color: var(--accent);
+}
+
+/* ─── Identity block ────────────────────────────────────────── */
+.profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--navy);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+  animation: fadeSlideUp 0.4s ease 0.06s both;
+}
+
+/* Avatar */
+.profile-avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-avatar-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0.4;
+  animation: ringPulse 3s ease-in-out infinite;
+}
+
+.profile-identity-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.profile-location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Edit button */
+.profile-edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.profile-edit-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ─── Section ───────────────────────────────────────────────── */
+.profile-section {
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+  animation: fadeSlideUp 0.4s ease 0.1s both;
+}
+
+.profile-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--subtle);
+  margin-bottom: 10px;
+}
+
+.profile-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.profile-section-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(228, 87, 46, 0.15);
+  border: 1px solid rgba(228, 87, 46, 0.3);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ─── Mode toggle ───────────────────────────────────────────── */
+.profile-mode-toggle {
+  position: relative;
+  display: flex;
+  background: #141414;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 3px;
+}
+
+.profile-mode-slider {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  width: calc(50% - 3px);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-radius: 9px;
+  transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  box-shadow: 0 0 14px rgba(228, 87, 46, 0.2);
+}
+
+.profile-mode-btn {
+  flex: 1;
+  position: relative;
+  z-index: 2;
+  padding: 10px 8px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 9px;
+  transition: color 0.2s ease;
+}
+
+.profile-mode-btn.active {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ─── Interest tags ─────────────────────────────────────────── */
+.profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-tag {
+  padding: 6px 14px;
+  background: rgba(228, 87, 46, 0.1);
+  border: 1px solid rgba(228, 87, 46, 0.3);
+  border-radius: 20px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.2px;
+}
+
+.profile-tag-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 20px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.profile-tag-add:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ─── Active request cards ──────────────────────────────────── */
+.profile-requests {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-request-card {
+  background: var(--navy);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeSlideUp 0.4s ease both;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  cursor: pointer;
+}
+
+.profile-request-card:hover {
+  border-color: rgba(228, 87, 46, 0.35);
+  background: #0f1e30;
+}
+
+/* left accent bar */
+.profile-request-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0 0 0 12px;
+}
+
+.profile-request-card:hover::before {
+  transform: scaleY(1);
+}
+
+.profile-request-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.profile-request-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.profile-request-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.profile-request-time.urgent {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.profile-request-statement {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  letter-spacing: -0.1px;
+}
+
+.profile-request-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-request-category {
+  display: inline-flex;
+  padding: 3px 10px;
+  background: rgba(228, 87, 46, 0.08);
+  border: 1px solid rgba(228, 87, 46, 0.2);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+}
+
+.profile-request-responses {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ─── Empty state ───────────────────────────────────────────── */
+.profile-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.profile-empty-text {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.profile-empty-cta {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.profile-empty-cta:hover { opacity: 0.75; }
+
+/* ─── Stats strip ───────────────────────────────────────────── */
+.profile-stats {
+  display: flex;
+  align-items: center;
+  background: var(--navy);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 0;
+  margin-top: 8px;
+  position: relative;
+  z-index: 1;
+  animation: fadeSlideUp 0.4s ease 0.18s both;
+}
+
+.profile-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.profile-stat-value {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.profile-stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.profile-stat-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--border);
+}
+
+/* ─── Responsive ────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .profile-container    { padding: 24px 16px 100px; }
+  .profile-header-title { font-size: 24px; }
+  .profile-stat-value   { font-size: 20px; }
+}
+
+/* ─── Loading state ─────────────────────────────────────────── */
+.profile-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+}
+
+.profile-loading-ring {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.profile-loading-text {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+/* ─── Logout ────────────────────────────────────────────────── */
+.profile-logout-wrapper {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-logout-btn {
+  padding: 10px 28px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.profile-logout-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* ─── Edit Modal ────────────────────────────────────────────── */
+.profile-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fade-in 0.2s ease both;
+}
+
+.profile-modal {
+  width: 100%;
+  max-width: 400px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: fadeSlideUp 0.25s ease both;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+}
+
+.profile-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.profile-modal-title {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--accent);
+}
+
+.profile-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.profile-modal-close:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.profile-modal-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--border) 30%,
+    rgba(228, 87, 46, 0.25) 50%,
+    var(--border) 70%,
+    transparent
+  );
+  margin-bottom: 20px;
+}
+
+.profile-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.profile-modal-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--subtle);
+}
+
+.profile-modal-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: #f0f0f0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-modal-input:focus {
+  border-color: rgba(228, 87, 46, 0.5);
+  box-shadow: 0 0 0 3px rgba(228, 87, 46, 0.08);
+}
+
+.profile-modal-save {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: filter 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  box-shadow: 0 4px 16px rgba(228, 87, 46, 0.25);
+}
+
+.profile-modal-save:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: scale(1.01);
+}
+
+.profile-modal-save.saving {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profile-modal-save.success {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.25);
+}
+
+/* ─── Tags modal extras ─────────────────────────────────────── */
+.profile-modal--tags {
+  max-width: 460px;
+}
+
+.profile-modal-hint {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.profile-tags-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-tag-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease,
+              background 0.15s ease;
+}
+
+.profile-tag-option:hover {
+  border-color: rgba(228, 87, 46, 0.4);
+  color: #fff;
+}
+
+.profile-tag-option.active {
+  background: rgba(228, 87, 46, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Selected tags summary row */
+.profile-tags-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 28px;
+}
+
+.profile-tags-none {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--subtle);
+  align-self: center;
+}
+
+.profile-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 10px;
+  background: rgba(228, 87, 46, 0.1);
+  border: 1px solid rgba(228, 87, 46, 0.3);
+  border-radius: 20px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.profile-tag-chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.profile-tag-chip-remove:hover { opacity: 1; }
+
+.profile-tags-empty {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--subtle);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   ADD THESE TO THE BOTTOM OF YOUR profile.css
+   ──────────────────────────────────────────────────────────── */
+
+/* ── Avatar on the identity card — image support ── */
+.profile-avatar--img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Edit modal wider for new sections ── */
+.profile-modal--edit {
+  max-width: 440px;
+  max-height: 88vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.profile-modal--edit::-webkit-scrollbar { display: none; }
+
+/* ── Section label inside modal ── */
+.profile-edit-section-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--subtle);
+  margin-bottom: 12px;
+}
+
+/* ── Error / success banners inside modal ── */
+.profile-edit-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: #f87171;
+  margin-bottom: 12px;
+}
+
+.profile-edit-success {
+  background: rgba(22, 163, 74, 0.1);
+  border: 1px solid rgba(22, 163, 74, 0.3);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: #4ade80;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+/* ── Avatar section ── */
+.profile-edit-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.profile-edit-avatar-preview {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-edit-avatar-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  display: block;
+}
+
+.profile-edit-avatar-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: #ffffff;
+  border: 2px solid var(--border);
+}
+
+.profile-edit-avatar-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.profile-edit-avatar-btn:hover { filter: brightness(1.15); }
+
+.profile-edit-avatar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-edit-avatar-hint {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.profile-edit-avatar-save {
+  padding: 7px 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.profile-edit-avatar-save:hover:not(:disabled) { filter: brightness(1.1); }
+.profile-edit-avatar-save.saving { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Password input with show/hide toggle ── */
+.profile-pw-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.profile-pw-input-wrap .profile-modal-input {
+  padding-right: 42px; /* room for the toggle button */
+}
+
+.profile-pw-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.profile-pw-toggle:hover { color: #ffffff; }

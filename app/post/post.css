@@ -1,0 +1,498 @@
+/*
+  post.css — styles for app/post/page.tsx
+  All design tokens and keyframes live in globals.css.
+  This file only contains component-level layout and styles.
+*/
+
+/* ─── Container ─────────────────────────────────────────────── */
+.postContainer {
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 32px 16px 100px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ─── Ambient glow ──────────────────────────────────────────── */
+.ambientGlow {
+  position: fixed;
+  top: -220px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 450px;
+  background: radial-gradient(ellipse, rgba(228, 87, 46, 0.13) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: glowPulse 5s ease-in-out infinite; /* keyframe in globals.css */
+}
+
+/* ─── Page header ───────────────────────────────────────────── */
+.pageHeader {
+  max-width: 640px;
+  margin: 0 auto 24px;
+  position: relative;
+  z-index: 1;
+  animation: fadeSlideUp 0.45s ease both; /* keyframe in globals.css */
+}
+
+.headerEyebrow {
+  font-size: 10px;
+  letter-spacing: 3.5px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.headerTitle {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.accentText {
+  color: var(--accent);
+}
+
+/* ─── Card ──────────────────────────────────────────────────── */
+.postCard {
+  max-width: 640px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  border: 1px solid #1f1f1f;
+  border-radius: 16px;
+  padding: 28px 24px;
+  position: relative;
+  z-index: 1;
+  animation: fadeSlideUp 0.45s ease 0.08s both; /* keyframe in globals.css */
+}
+
+/* ─── Mode toggle ───────────────────────────────────────────── */
+.modeToggleWrapper {
+  margin-bottom: 24px;
+}
+
+.modeToggle {
+  display: flex;
+  background: #1a1a1a;
+  border-radius: 10px;
+  padding: 3px;
+  position: relative;
+  border: 1px solid var(--border);
+}
+
+.modeSlider {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  width: calc(50% - 3px);
+  background: var(--accent);
+  border-radius: 8px;
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.modeBtn {
+  flex: 1;
+  padding: 10px 8px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  transition: color 0.2s ease;
+  border-radius: 8px;
+}
+
+.modeBtnActive {
+  color: #ffffff;
+}
+
+/* ─── Intent label ──────────────────────────────────────────── */
+.intentLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+/* ─── Textarea ──────────────────────────────────────────────── */
+.textareaWrapper {
+  position: relative;
+  margin-bottom: 28px;
+}
+
+.intentTextarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px 48px 16px;
+  color: #f0f0f0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+  resize: none;
+  display: block;
+  transition: border-color 0.2s ease;
+}
+
+/* placeholder + focus handled globally in globals.css */
+.intentTextarea:focus {
+  border-color: rgba(228, 87, 46, 0.3);
+}
+
+.charCounter {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.charNumber {
+  position: absolute;
+  font-size: 9px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* ─── Section blocks ────────────────────────────────────────── */
+.sectionBlock {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--subtle);
+  margin-bottom: 12px;
+}
+
+/* ─── Category grid ─────────────────────────────────────────── */
+.categoryGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.categoryBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: #9ca3af;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease,
+              background 0.15s ease, transform 0.15s ease;
+}
+
+.categoryBtn:hover {
+  border-color: var(--accent);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.categoryBtn.active {
+  background: rgba(228, 87, 46, 0.12);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.catIcon {
+  font-size: 14px;
+}
+
+/* ─── Visibility ────────────────────────────────────────────── */
+.visibilityRow {
+  display: flex;
+  gap: 10px;
+}
+
+.visibilityBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: #9ca3af;
+  text-align: left;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.visibilityBtn:hover { border-color: rgba(228, 87, 46, 0.35); }
+
+.visibilityBtn.active {
+  background: rgba(228, 87, 46, 0.1);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.visIcon  { font-size: 20px; flex-shrink: 0; }
+
+.visLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: inherit;
+  margin-bottom: 2px;
+}
+
+.visDesc { font-size: 11px; color: var(--subtle); }
+
+/* ─── Duration ──────────────────────────────────────────────── */
+.durationRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.durationBtn {
+  padding: 7px 16px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: #9ca3af;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.durationBtn:hover {
+  border-color: rgba(228, 87, 46, 0.35);
+  color: #fff;
+}
+
+.durationBtn.active {
+  background: rgba(228, 87, 46, 0.12);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+/* ─── Location ──────────────────────────────────────────────── */
+.locationWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: border-color 0.2s ease;
+}
+
+.locationWrapper:focus-within { border-color: rgba(228, 87, 46, 0.3); }
+
+.locationPin { font-size: 16px; flex-shrink: 0; }
+
+.locationInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #f0f0f0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+
+/* ─── Tags ──────────────────────────────────────────────────── */
+.tagInputWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-height: 50px;
+  transition: border-color 0.2s ease;
+}
+
+.tagInputWrapper:focus-within { border-color: rgba(228, 87, 46, 0.3); }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(228, 87, 46, 0.12);
+  border: 1px solid rgba(228, 87, 46, 0.3);
+  color: var(--accent);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tagRemove {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.tagRemove:hover { opacity: 1; }
+
+.tagInput {
+  flex: 1;
+  min-width: 120px;
+  background: transparent;
+  border: none;
+  color: #f0f0f0;
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+.tagHint {
+  font-size: 11px;
+  color: #374151;
+  margin-top: 6px;
+}
+
+/* ─── Submit button ─────────────────────────────────────────── */
+.submitBtn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  margin-top: 4px;
+}
+
+.submitBtn:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: scale(1.01);
+}
+
+.submitBtn:active:not(:disabled) { transform: scale(0.98); }
+
+.submitDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ─── Success screen ────────────────────────────────────────── */
+.successOverlay {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 24px;
+}
+
+.successCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  animation: successPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; /* keyframe in globals.css */
+}
+
+.successRing {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(228, 87, 46, 0.12);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ringPulse 2.5s ease infinite; /* keyframe in globals.css */
+}
+
+.successEmoji {
+  font-size: 30px;
+  color: var(--accent);
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+
+.successTitle {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.successSub { color: #9ca3af; font-size: 15px; }
+
+.successMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.metaBadge {
+  padding: 4px 12px;
+  background: rgba(228, 87, 46, 0.1);
+  border: 1px solid rgba(228, 87, 46, 0.3);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.newPostBtn {
+  margin-top: 8px;
+  padding: 12px 28px;
+  background: var(--accent);
+  color: #ffffff;
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.15s ease;
+}
+
+.newPostBtn:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+/* ─── Responsive ────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .postCard      { padding: 20px 16px; border-radius: 12px; }
+  .headerTitle   { font-size: 22px; }
+  .visibilityRow { flex-direction: column; }
+  .durationBtn   { padding: 6px 12px; font-size: 12px; }
+}

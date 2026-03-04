@@ -1,0 +1,96 @@
+/*
+  categoryfilter.css — styles for CategoryFilter.tsx
+  Tokens + keyframes live in globals.css
+*/
+
+/* ─── Wrapper ───────────────────────────────────────────────── */
+.catfilter-wrapper {
+  position: relative;
+  padding: 12px 20px 4px;
+}
+
+/* ─── Scrollable row ────────────────────────────────────────── */
+.catfilter-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  /* smooth momentum scroll on iOS */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* ─── Individual pill button ────────────────────────────────── */
+.catfilter-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 6px 16px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease,
+              background 0.15s ease, transform 0.15s ease,
+              box-shadow 0.15s ease;
+  animation: fadeSlideUp 0.3s ease both; /* keyframe in globals.css */
+}
+
+.catfilter-btn:hover {
+  border-color: rgba(228, 87, 46, 0.5);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.catfilter-btn:active {
+  transform: scale(0.95);
+}
+
+/* ─── Active state ──────────────────────────────────────────── */
+.catfilter-btn.active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #ffffff;
+  box-shadow: 0 0 0 1px var(--navy),
+              2px 2px 0px rgba(228, 87, 46, 0.3);
+}
+
+/* small dot shown inside active pill */
+.catfilter-active-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  animation: livePulse 1.8s ease-in-out infinite; /* keyframe in globals.css */
+}
+
+/* ─── Edge fade masks ───────────────────────────────────────── */
+.catfilter-fade-left,
+.catfilter-fade-right {
+  position: absolute;
+  top: 12px;
+  bottom: 0;
+  width: 32px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.catfilter-fade-left {
+  left: 0;
+  background: linear-gradient(90deg, var(--bg) 0%, transparent 100%);
+}
+
+.catfilter-fade-right {
+  right: 0;
+  background: linear-gradient(270deg, var(--bg) 0%, transparent 100%);
+}

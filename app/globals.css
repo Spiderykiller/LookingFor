@@ -1,26 +1,109 @@
 @import "tailwindcss";
 
+/* ─── Design Tokens ─────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Colors */
+  --bg:         #0d0d0d;
+  --card-bg:    #111111;
+  --text:       #E0E0FF;
+  --accent:     #E4572E;   /* single source of truth for orange */
+  --accent-2:   #c2410c;   /* darker orange for gradients */
+  --navy:       #0E1A2B;
+  --border:     #242424;   /* dark border used across all components */
+  --muted:      #6b7280;   /* muted text */
+  --subtle:     #4b5563;   /* even more muted */
+
+  /* Fonts (mapped from next/font CSS variables) */
+  --font-sans: var(--font-dm-sans, 'DM Sans', sans-serif);
+  --font-display: var(--font-syne, 'Syne', sans-serif);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* ─── Dark mode (same tokens — already dark) ────────────────── */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg:      #0d0d0d;
+    --card-bg: #111111;
+    --text:    #E0E0FF;
+    --accent:  #E4572E;
+    --navy:    #0E1A2B;
+    --border:  #242424;
   }
 }
 
+/* ─── Base ──────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+/* ─── Form element resets (global, apply everywhere) ────────── */
+textarea::placeholder,
+input::placeholder {
+  color: #3d3d3d;
+}
+
+textarea:focus,
+input:focus {
+  outline: none;
+}
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+}
+
+/* ─── Scrollbar removal utility ─────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ─── Animations ────────────────────────────────────────────── */
+
+/* Used on feed cards and page sections */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+/* Used on post page header + card */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* Used on ambient glow element */
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.3; transform: translateX(-50%) scale(1);    }
+  50%       { opacity: 0.5; transform: translateX(-50%) scale(1.05); }
+}
+
+/* Used on post success screen card */
+@keyframes successPop {
+  0%   { transform: scale(0.7);  opacity: 0; }
+  70%  { transform: scale(1.05);             }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+/* Used on post success ring */
+@keyframes ringPulse {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(228, 87, 46, 0.4); }
+  50%       { box-shadow: 0 0 0 20px rgba(228, 87, 46, 0);  }
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1;   box-shadow: 0 0 0 0   rgba(228, 87, 46, 0.6); }
+  50%       { opacity: 0.7; box-shadow: 0 0 0 5px rgba(228, 87, 46, 0);   }
 }

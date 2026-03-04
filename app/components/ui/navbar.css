@@ -1,0 +1,119 @@
+/*
+  navbar.css — styles for Navbar.tsx
+  Tokens + keyframes live in globals.css
+*/
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  background: var(--bg);
+  /* subtle frosted glass effect */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(13, 13, 13, 0.85);
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+}
+
+/* ─── Logo ──────────────────────────────────────────────────── */
+.navbar-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.navbar-logo-text {
+  color: #ffffff;
+}
+
+.navbar-logo-accent {
+  color: var(--accent);
+}
+
+/* small animated dot after the period */
+.navbar-logo-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-left: 3px;
+  margin-bottom: 6px;
+  animation: dotBlink 2.4s ease-in-out infinite;
+}
+
+@keyframes dotBlink {
+  0%, 100% { opacity: 1;   transform: scale(1);   }
+  50%       { opacity: 0.3; transform: scale(0.6); }
+}
+
+/* ─── Center label ──────────────────────────────────────────── */
+.navbar-label {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.7;
+  /* hide on very small screens */
+  @media (max-width: 360px) { display: none; }
+}
+
+/* ─── Live indicator ────────────────────────────────────────── */
+.navbar-live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid rgba(228, 87, 46, 0.25);
+  border-radius: 20px;
+  background: rgba(228, 87, 46, 0.06);
+}
+
+.navbar-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: livePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1;   box-shadow: 0 0 0 0   rgba(228, 87, 46, 0.6); }
+  50%       { opacity: 0.7; box-shadow: 0 0 0 5px rgba(228, 87, 46, 0);   }
+}
+
+.navbar-live-text {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ─── Bottom line ───────────────────────────────────────────── */
+.navbar-line {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--border) 20%,
+    rgba(228, 87, 46, 0.4) 50%,
+    var(--border) 80%,
+    transparent 100%
+  );
+}

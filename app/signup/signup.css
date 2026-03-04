@@ -1,0 +1,216 @@
+/*
+  signup.css — styles for app/signup/page.tsx
+  All design tokens and keyframes live in globals.css
+*/
+
+/* ─── Page wrapper ──────────────────────────────────────────── */
+.signup-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 24px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── Ambient glow ──────────────────────────────────────────── */
+.signup-glow {
+  position: fixed;
+  top: -180px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(ellipse, rgba(228, 87, 46, 0.14) 0%, transparent 68%);
+  pointer-events: none;
+  z-index: 0;
+  animation: glowPulse 5s ease-in-out infinite;
+}
+
+/* ─── Card ──────────────────────────────────────────────────── */
+.signup-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 36px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  animation: fadeSlideUp 0.45s ease both;
+  box-shadow:
+    0 0 0 1px rgba(228, 87, 46, 0.06),
+    0 24px 48px rgba(0, 0, 0, 0.4);
+}
+
+/* ─── Logo ──────────────────────────────────────────────────── */
+.signup-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  margin-bottom: 6px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.signup-logo-text   { color: #ffffff; }
+.signup-logo-accent { color: var(--accent); }
+
+.signup-logo-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-left: 3px;
+  margin-bottom: 7px;
+  animation: livePulse 2.4s ease-in-out infinite;
+}
+
+/* ─── Tagline ───────────────────────────────────────────────── */
+.signup-tagline {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+  margin-bottom: 24px;
+}
+
+/* ─── Gradient divider ──────────────────────────────────────── */
+.signup-divider-line {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--border) 30%,
+    rgba(228, 87, 46, 0.3) 50%,
+    var(--border) 70%,
+    transparent 100%
+  );
+  margin-bottom: 20px;
+}
+
+/* ─── Step label ────────────────────────────────────────────── */
+.signup-step-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+
+/* ─── Field ─────────────────────────────────────────────────── */
+.signup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.signup-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--subtle);
+}
+
+.signup-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: #f0f0f0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.signup-input:focus {
+  border-color: rgba(228, 87, 46, 0.5);
+  box-shadow: 0 0 0 3px rgba(228, 87, 46, 0.08);
+}
+
+/* ─── Primary button ────────────────────────────────────────── */
+.signup-btn-primary {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  box-shadow: 0 4px 20px rgba(228, 87, 46, 0.25);
+  margin-bottom: 20px;
+}
+
+.signup-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: scale(1.01);
+}
+
+.signup-btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.signup-btn-primary.loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Login link ────────────────────────────────────────────── */
+.signup-login-text {
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.signup-login-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.signup-login-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* ─── Responsive ────────────────────────────────────────────── */
+@media (max-width: 440px) {
+  .signup-card {
+    padding: 28px 20px 24px;
+    border-radius: 14px;
+  }
+}
+
+/* ─── Error banner ──────────────────────────────────────────── */
+.signup-error {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: #f87171;
+  margin-bottom: 14px;
+  animation: fadeSlideUp 0.3s ease both;
+}

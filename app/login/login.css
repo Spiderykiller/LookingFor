@@ -1,0 +1,282 @@
+/*
+  login.css — styles for app/login/page.tsx
+  All design tokens and keyframes live in globals.css
+*/
+
+/* ─── Page wrapper ──────────────────────────────────────────── */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 24px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── Ambient glow ──────────────────────────────────────────── */
+.login-glow {
+  position: fixed;
+  top: -180px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(ellipse, rgba(228, 87, 46, 0.14) 0%, transparent 68%);
+  pointer-events: none;
+  z-index: 0;
+  animation: glowPulse 5s ease-in-out infinite;
+}
+
+/* ─── Card ──────────────────────────────────────────────────── */
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 36px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: fadeSlideUp 0.45s ease both;
+
+  /* subtle top glow on card */
+  box-shadow:
+    0 0 0 1px rgba(228, 87, 46, 0.06),
+    0 24px 48px rgba(0, 0, 0, 0.4);
+}
+
+/* ─── Logo ──────────────────────────────────────────────────── */
+.login-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  margin-bottom: 6px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.login-logo-text   { color: #ffffff; }
+.login-logo-accent { color: var(--accent); }
+
+.login-logo-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-left: 3px;
+  margin-bottom: 7px;
+  animation: livePulse 2.4s ease-in-out infinite;
+}
+
+/* ─── Tagline ───────────────────────────────────────────────── */
+.login-tagline {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+  margin-bottom: 24px;
+}
+
+/* ─── Divider line ──────────────────────────────────────────── */
+.login-divider-line {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--border) 30%,
+    rgba(228, 87, 46, 0.3) 50%,
+    var(--border) 70%,
+    transparent 100%
+  );
+  margin-bottom: 24px;
+}
+
+/* ─── Field ─────────────────────────────────────────────────── */
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.login-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--subtle);
+}
+
+.login-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: #f0f0f0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-input:focus {
+  border-color: rgba(228, 87, 46, 0.5);
+  box-shadow: 0 0 0 3px rgba(228, 87, 46, 0.08);
+}
+
+/* ─── Primary button ────────────────────────────────────────── */
+.login-btn-primary {
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  box-shadow: 0 4px 20px rgba(228, 87, 46, 0.25);
+}
+
+.login-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: scale(1.01);
+}
+
+.login-btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.login-btn-primary.loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── OR separator ──────────────────────────────────────────── */
+.login-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.login-or-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.login-or-text {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--subtle);
+  text-transform: uppercase;
+}
+
+/* ─── Google button ─────────────────────────────────────────── */
+.login-btn-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.login-btn-google:hover {
+  border-color: rgba(228, 87, 46, 0.4);
+  background: rgba(228, 87, 46, 0.05);
+  transform: scale(1.01);
+}
+
+.login-btn-google:active {
+  transform: scale(0.98);
+}
+
+.login-google-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* ─── Sign up text ──────────────────────────────────────────── */
+.login-signup-text {
+  text-align: center;
+  margin-top: 20px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.login-signup-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.login-signup-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* ─── Responsive ────────────────────────────────────────────── */
+@media (max-width: 440px) {
+  .login-card {
+    padding: 28px 20px 24px;
+    border-radius: 14px;
+  }
+}
+
+/* ─── ADD THESE TO THE BOTTOM OF login.css ─────────────────── */
+
+/* Error banner */
+.login-error {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: #f87171;
+  line-height: 1.5;
+  animation: fadeSlideUp 0.2s ease both;
+  margin-bottom: 4px;
+}
+
+.login-error-link {
+  color: #fca5a5;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Red ring on empty/invalid inputs */
+.login-input.input-error {
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.07);
+}
