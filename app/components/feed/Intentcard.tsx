@@ -116,7 +116,6 @@ export default function IntentCard({
       if (res.ok) {
         const newResponse = await res.json();
         setResponses(prev => [...prev, newResponse]);
-        setCount(c => c + 1);
       } else {
         // Put message back if send failed
         setMessage(text);
