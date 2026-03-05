@@ -214,3 +214,18 @@
   margin-bottom: 14px;
   animation: fadeSlideUp 0.3s ease both;
 }
+
+/* ── Add to bottom of signup.css ── */
+
+.signup-field-hint {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: 0.2px;
+}
+
+.signup-input.input-error {
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.07);
+}
