@@ -14,6 +14,7 @@ export interface FeedItem {
   responseCount: number;
   mode: "looking" | "offering";
   username?: string;
+  userId?: string;   // ← owner's user_id for DM
 }
 
 interface FeedProps {
@@ -71,7 +72,8 @@ export default function Feed({ items, isLoading = false }: FeedProps) {
               expiresAt={item.expiresAt}
               responseCount={item.responseCount}
               username={item.username}
-              mode={item.mode}          // ← now passed down
+              mode={item.mode}
+              userId={item.userId}     // ← pass through
             />
           </div>
         ))}

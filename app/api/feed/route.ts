@@ -7,6 +7,7 @@ export async function GET() {
     const intents = await sql`
       SELECT 
         i.id,
+        i.user_id,
         i.statement,
         i.category,
         i.location,

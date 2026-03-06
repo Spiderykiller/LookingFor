@@ -366,7 +366,7 @@ export default function ProfilePage() {
                 className="profile-modal-input"
                 value={form.location}
                 onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
-                placeholder="e.g. Addis Ababa, Ethiopia"
+                placeholder="e.g. Istanbul, Turkey"
               />
             </div>
             <button

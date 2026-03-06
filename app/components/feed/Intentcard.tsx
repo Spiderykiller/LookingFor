@@ -3,8 +3,9 @@
 import "./intentcard.css";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Users, MessageCircle, MapPin, Clock, X, Send } from "lucide-react";
+import { Users, MessageCircle, MapPin, Clock, X, Send, Mail } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface IntentCardProps {
   id: string;
@@ -14,7 +15,8 @@ interface IntentCardProps {
   expiresAt: Date;
   responseCount: number;
   username?: string;
-  mode?: "looking" | "offering";   // ← added
+  mode?: "looking" | "offering";
+  userId?: string;   // ← owner's user_id for DM
 }
 
 interface Response {
@@ -33,9 +35,11 @@ export default function IntentCard({
   expiresAt,
   responseCount,
   username = "Anonymous",
-  mode = "looking",               // ← added
+  mode = "looking",
+  userId,
 }: IntentCardProps) {
   const { data: session } = useSession();
+  const router = useRouter();
 
   const categories = Array.isArray(category) ? category : [category];
   const ctaLabel   = mode === "offering" ? "Also Offering" : "Also Looking";
@@ -51,6 +55,7 @@ export default function IntentCard({
   const [message,       setMessage]       = useState<string>("");
   const [sending,       setSending]       = useState<boolean>(false);
   const [mounted,       setMounted]       = useState<boolean>(false);
+  const [dmLoading,     setDmLoading]     = useState<boolean>(false);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -102,11 +107,9 @@ export default function IntentCard({
 
   const handleSend = async () => {
     if (!message.trim() || !session?.user || sending) return;
-
     const text = message.trim();
-    setMessage("");        // clear input immediately so user can type next message
+    setMessage("");
     setSending(true);
-
     try {
       const res = await fetch("/api/responses", {
         method:  "POST",
@@ -117,33 +120,69 @@ export default function IntentCard({
         const newResponse = await res.json();
         setResponses(prev => [...prev, newResponse]);
       } else {
-        // Put message back if send failed
         setMessage(text);
       }
     } catch (err) {
       console.error("Failed to send:", err);
-      setMessage(text);   // restore on error too
+      setMessage(text);
     } finally {
       setSending(false);
     }
   };
+
+  // ── Start or open a DM with the intent poster ────────────────
+  const handleDirectMessage = async () => {
+    if (!session?.user) { router.push("/login"); return; }
+    if (!userId || userId === session.user.id) return;
+    setDmLoading(true);
+    try {
+      const res = await fetch("/api/conversations", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ other_user_id: userId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setThreadOpen(false);
+        router.push(`/messages/${data.id}`);
+      }
+    } catch (err) {
+      console.error("DM failed:", err);
+    } finally {
+      setDmLoading(false);
+    }
+  };
+
+  const showDmButton = userId && session?.user?.id && userId !== session.user.id;
 
   const drawer = threadOpen && mounted ? createPortal(
     <div className="icard-overlay" onClick={() => setThreadOpen(false)}>
       <div className="icard-drawer" onClick={e => e.stopPropagation()}>
 
         <div className="icard-drawer-header">
-          <div>
-            <div className="icard-drawer-cats">
-              {categories.map(cat => (
-                <span key={cat} className="icard-category-pill">{cat}</span>
-              ))}
-            </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p className="icard-drawer-mode">
+              {mode === "looking" ? "LOOKING FOR" : "OFFERING"} —
+            </p>
             <p className="icard-drawer-statement">{statement}</p>
           </div>
-          <button className="icard-drawer-close" onClick={() => setThreadOpen(false)}>
-            <X size={16} />
-          </button>
+          <div className="icard-drawer-header-actions">
+            {/* DM button in header */}
+            {showDmButton && (
+              <button
+                className="icard-dm-btn"
+                onClick={handleDirectMessage}
+                disabled={dmLoading}
+                title={`Message ${username}`}
+              >
+                <Mail size={14} />
+                {dmLoading ? "…" : "DM"}
+              </button>
+            )}
+            <button className="icard-drawer-close" onClick={() => setThreadOpen(false)}>
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         <div className="icard-drawer-divider" />
@@ -208,15 +247,19 @@ export default function IntentCard({
       <div className="icard">
 
         <div className="icard-top">
-          <div className="icard-categories">
-            {categories.map(cat => (
-              <span key={cat} className="icard-category-pill">{cat}</span>
-            ))}
-          </div>
+          <p className="icard-mode-label">
+            {mode === "looking" ? "LOOKING FOR" : "OFFERING"} —
+          </p>
           <span className="icard-username">{username}</span>
         </div>
 
         <p className="icard-statement">{statement}</p>
+
+        <div className="icard-categories">
+          {categories.map(cat => (
+            <span key={cat} className="icard-category-pill">{cat}</span>
+          ))}
+        </div>
 
         <div className="icard-meta">
           <div className="icard-location">

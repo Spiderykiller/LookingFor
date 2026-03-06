@@ -7,6 +7,7 @@ async function getFeed(): Promise<FeedItem[]> {
     const rows = await sql`
       SELECT
         i.id,
+        i.user_id,
         i.statement,
         i.category,
         i.location,
@@ -28,6 +29,7 @@ async function getFeed(): Promise<FeedItem[]> {
 
     return rows.map((item: any) => ({
       id:            item.id,
+      userId:        item.user_id,   // ← include for DM
       statement:     item.statement,
       category:      item.category,
       location:      item.location ?? null,
