@@ -1,7 +1,7 @@
 "use client";
 
 import "./profile.css";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { MapPin, MessageCircle, Clock, Edit2, Plus, X, Check, Camera, Eye, EyeOff, Bookmark } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
@@ -24,7 +24,7 @@ const CATEGORIES = [
   "Arts", "Music", "Gaming", "Housing", "Community",
 ];
 
-export default function ProfilePage() {
+function ProfilePageInner() {
   const { data: session, status, update: updateSession } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -711,5 +711,13 @@ export default function ProfilePage() {
       </div>
 
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={null}>
+      <ProfilePageInner />
+    </Suspense>
   );
 }
