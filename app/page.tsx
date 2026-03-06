@@ -31,6 +31,7 @@ export default function Home() {
           mode:          item.mode,
           responseCount: Number(item.response_count ?? 0),
           username:      item.username,
+          userId:        item.user_id,   // ← include owner id
         }));
 
         setItems(mapped);
@@ -49,13 +50,10 @@ export default function Home() {
       const modeMatch = mode === "LOOKING"
         ? item.mode === "looking"
         : item.mode === "offering";
-
-      // category is now an array — match if ANY category matches the filter
       const categoryMatch = category === null
         || (Array.isArray(item.category)
           ? item.category.includes(category)
           : item.category === category);
-
       return modeMatch && categoryMatch;
     });
   }, [items, mode, category]);
