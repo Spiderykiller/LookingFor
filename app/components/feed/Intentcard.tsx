@@ -3,7 +3,10 @@
 import "./intentcard.css";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Users, MessageCircle, MapPin, Clock, X, Send, Mail } from "lucide-react";
+import {
+  Users, MessageCircle, MapPin, Clock,
+  X, Send, Mail, Bookmark, BookmarkCheck,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -16,7 +19,9 @@ interface IntentCardProps {
   responseCount: number;
   username?: string;
   mode?: "looking" | "offering";
-  userId?: string;   // ← owner's user_id for DM
+  userId?: string;
+  isBookmarked?: boolean;
+  searchMode?: boolean; // ← shows quick action bar
 }
 
 interface Response {
@@ -37,6 +42,8 @@ export default function IntentCard({
   username = "Anonymous",
   mode = "looking",
   userId,
+  isBookmarked: initialBookmarked = false,
+  searchMode = false,
 }: IntentCardProps) {
   const { data: session } = useSession();
   const router = useRouter();
@@ -44,28 +51,29 @@ export default function IntentCard({
   const categories = Array.isArray(category) ? category : [category];
   const ctaLabel   = mode === "offering" ? "Also Offering" : "Also Looking";
 
-  const [timeLeft,      setTimeLeft]      = useState<string>("");
-  const [isUrgent,      setIsUrgent]      = useState<boolean>(false);
-  const [count,         setCount]         = useState<number>(responseCount);
-  const [alsoLoading,   setAlsoLoading]   = useState<boolean>(false);
-  const [alsoJoined,    setAlsoJoined]    = useState<boolean>(false);
-  const [threadOpen,    setThreadOpen]    = useState<boolean>(false);
+  const [timeLeft,      setTimeLeft]      = useState("");
+  const [isUrgent,      setIsUrgent]      = useState(false);
+  const [count,         setCount]         = useState(responseCount);
+  const [alsoLoading,   setAlsoLoading]   = useState(false);
+  const [alsoJoined,    setAlsoJoined]    = useState(false);
+  const [threadOpen,    setThreadOpen]    = useState(false);
   const [responses,     setResponses]     = useState<Response[]>([]);
-  const [threadLoading, setThreadLoading] = useState<boolean>(false);
-  const [message,       setMessage]       = useState<string>("");
-  const [sending,       setSending]       = useState<boolean>(false);
-  const [mounted,       setMounted]       = useState<boolean>(false);
-  const [dmLoading,     setDmLoading]     = useState<boolean>(false);
+  const [threadLoading, setThreadLoading] = useState(false);
+  const [message,       setMessage]       = useState("");
+  const [sending,       setSending]       = useState(false);
+  const [mounted,       setMounted]       = useState(false);
+  const [dmLoading,     setDmLoading]     = useState(false);
+  const [bookmarked,    setBookmarked]    = useState(initialBookmarked);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     const updateTime = () => {
-      const now      = Date.now();
-      const distance = new Date(expiresAt).getTime() - now;
+      const distance = new Date(expiresAt).getTime() - Date.now();
       if (distance <= 0) { setTimeLeft("Expired"); setIsUrgent(false); return; }
-      const hours   = Math.floor(distance / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const hours   = Math.floor(distance / 3600000);
+      const minutes = Math.floor((distance % 3600000) / 60000);
       setIsUrgent(hours < 2);
       setTimeLeft(hours < 1 ? `${minutes}m` : `${hours}h ${minutes}m`);
     };
@@ -74,23 +82,41 @@ export default function IntentCard({
     return () => clearInterval(interval);
   }, [expiresAt]);
 
+  /* ── Also Looking / Offering ─────────────────────────────── */
   const handleAlsoLooking = async () => {
     if (!session?.user || alsoJoined || alsoLoading) return;
     setAlsoLoading(true);
     try {
       const res = await fetch("/api/responses", {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ intent_id: id, message: ctaLabel }),
+        body: JSON.stringify({ intent_id: id, message: ctaLabel }),
       });
       if (res.ok) { setAlsoJoined(true); setCount(c => c + 1); }
-    } catch (err) {
-      console.error("Failed to respond:", err);
-    } finally {
-      setAlsoLoading(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setAlsoLoading(false); }
   };
 
+  /* ── Bookmark ────────────────────────────────────────────── */
+  const handleBookmark = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!session?.user) { router.push("/login"); return; }
+    if (bookmarkLoading) return;
+    setBookmarkLoading(true);
+    const prev = bookmarked;
+    setBookmarked(!prev); // optimistic
+    try {
+      const res = await fetch("/api/bookmarks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent_id: id }),
+      });
+      if (!res.ok) setBookmarked(prev); // revert on failure
+    } catch { setBookmarked(prev); }
+    finally { setBookmarkLoading(false); }
+  };
+
+  /* ── Open thread ─────────────────────────────────────────── */
   const openThread = async () => {
     setThreadOpen(true);
     setThreadLoading(true);
@@ -98,13 +124,11 @@ export default function IntentCard({
       const res  = await fetch(`/api/responses?intent_id=${id}`);
       const data = await res.json();
       setResponses(data);
-    } catch (err) {
-      console.error("Failed to load responses:", err);
-    } finally {
-      setThreadLoading(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setThreadLoading(false); }
   };
 
+  /* ── Send response ───────────────────────────────────────── */
   const handleSend = async () => {
     if (!message.trim() || !session?.user || sending) return;
     const text = message.trim();
@@ -112,9 +136,9 @@ export default function IntentCard({
     setSending(true);
     try {
       const res = await fetch("/api/responses", {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ intent_id: id, message: text }),
+        body: JSON.stringify({ intent_id: id, message: text }),
       });
       if (res.ok) {
         const newResponse = await res.json();
@@ -122,39 +146,34 @@ export default function IntentCard({
       } else {
         setMessage(text);
       }
-    } catch (err) {
-      console.error("Failed to send:", err);
-      setMessage(text);
-    } finally {
-      setSending(false);
-    }
+    } catch { setMessage(text); }
+    finally { setSending(false); }
   };
 
-  // ── Start or open a DM with the intent poster ────────────────
-  const handleDirectMessage = async () => {
+  /* ── Direct message ──────────────────────────────────────── */
+  const handleDirectMessage = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (!session?.user) { router.push("/login"); return; }
     if (!userId || userId === session.user.id) return;
     setDmLoading(true);
     try {
       const res = await fetch("/api/conversations", {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ other_user_id: userId }),
+        body: JSON.stringify({ other_user_id: userId }),
       });
       const data = await res.json();
       if (res.ok) {
         setThreadOpen(false);
         router.push(`/messages/${data.id}`);
       }
-    } catch (err) {
-      console.error("DM failed:", err);
-    } finally {
-      setDmLoading(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setDmLoading(false); }
   };
 
   const showDmButton = userId && session?.user?.id && userId !== session.user.id;
 
+  /* ── Drawer portal ───────────────────────────────────────── */
   const drawer = threadOpen && mounted ? createPortal(
     <div className="icard-overlay" onClick={() => setThreadOpen(false)}>
       <div className="icard-drawer" onClick={e => e.stopPropagation()}>
@@ -167,11 +186,10 @@ export default function IntentCard({
             <p className="icard-drawer-statement">{statement}</p>
           </div>
           <div className="icard-drawer-header-actions">
-            {/* DM button in header */}
             {showDmButton && (
               <button
                 className="icard-dm-btn"
-                onClick={handleDirectMessage}
+                onClick={() => handleDirectMessage()}
                 disabled={dmLoading}
                 title={`Message ${username}`}
               >
@@ -236,7 +254,6 @@ export default function IntentCard({
             <a href="/login">Log in</a> to respond
           </p>
         )}
-
       </div>
     </div>,
     document.body
@@ -244,13 +261,28 @@ export default function IntentCard({
 
   return (
     <>
-      <div className="icard">
+      <div className={`icard${searchMode ? " search-mode" : ""}`}>
 
         <div className="icard-top">
           <p className="icard-mode-label">
             {mode === "looking" ? "LOOKING FOR" : "OFFERING"} —
           </p>
-          <span className="icard-username">{username}</span>
+          <div className="icard-top-right">
+            <span className="icard-username">{username}</span>
+            {/* Bookmark button */}
+            <button
+              className={`icard-bookmark-btn${bookmarked ? " saved" : ""}`}
+              onClick={handleBookmark}
+              disabled={bookmarkLoading}
+              title={bookmarked ? "Remove bookmark" : "Save intent"}
+              aria-label={bookmarked ? "Remove bookmark" : "Save intent"}
+            >
+              {bookmarked
+                ? <BookmarkCheck size={14} strokeWidth={2} />
+                : <Bookmark size={14} strokeWidth={2} />
+              }
+            </button>
+          </div>
         </div>
 
         <p className="icard-statement">{statement}</p>
@@ -274,24 +306,57 @@ export default function IntentCard({
 
         <div className="icard-divider" />
 
-        <div className="icard-footer">
-          <div className="icard-stats">
-            <button className="icard-stat-btn">
-              <Users size={14} strokeWidth={2} />
-              <span>{count}</span>
+        {/* Quick action bar — shown in search mode for immediate action */}
+        {searchMode && (
+          <div className="icard-quick-actions">
+            <button
+              className="icard-quick-btn primary"
+              onClick={handleAlsoLooking}
+              disabled={alsoLoading || alsoJoined || !session?.user}
+            >
+              {alsoJoined ? "✓ Joined" : alsoLoading ? "…" : ctaLabel}
             </button>
-            <button className="icard-stat-btn" onClick={openThread}>
-              <MessageCircle size={14} strokeWidth={2} />
+            {showDmButton && (
+              <button
+                className="icard-quick-btn secondary"
+                onClick={handleDirectMessage}
+                disabled={dmLoading}
+              >
+                <Mail size={13} />
+                {dmLoading ? "…" : "Message"}
+              </button>
+            )}
+            <button
+              className="icard-quick-btn ghost"
+              onClick={openThread}
+            >
+              <MessageCircle size={13} />
+              {count}
             </button>
           </div>
-          <button
-            className={`icard-cta${alsoJoined ? " joined" : ""}`}
-            onClick={handleAlsoLooking}
-            disabled={alsoLoading || alsoJoined || !session?.user}
-          >
-            {alsoJoined ? "✓ Joined" : alsoLoading ? "…" : ctaLabel}
-          </button>
-        </div>
+        )}
+
+        {/* Standard footer — shown when NOT in search mode */}
+        {!searchMode && (
+          <div className="icard-footer">
+            <div className="icard-stats">
+              <button className="icard-stat-btn">
+                <Users size={14} strokeWidth={2} />
+                <span>{count}</span>
+              </button>
+              <button className="icard-stat-btn" onClick={openThread}>
+                <MessageCircle size={14} strokeWidth={2} />
+              </button>
+            </div>
+            <button
+              className={`icard-cta${alsoJoined ? " joined" : ""}`}
+              onClick={handleAlsoLooking}
+              disabled={alsoLoading || alsoJoined || !session?.user}
+            >
+              {alsoJoined ? "✓ Joined" : alsoLoading ? "…" : ctaLabel}
+            </button>
+          </div>
+        )}
 
       </div>
 

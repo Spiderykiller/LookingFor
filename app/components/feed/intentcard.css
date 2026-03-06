@@ -488,3 +488,124 @@
   color: var(--accent);
   margin-bottom: 4px;
 }
+
+
+/* ── Append to intentcard.css ── */
+
+/* ─── Bookmark button ────────────────────────────────────────── */
+.icard-top-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icard-bookmark-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--subtle);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.icard-bookmark-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(228, 87, 46, 0.08);
+}
+
+.icard-bookmark-btn.saved {
+  border-color: var(--accent);
+  background: rgba(228, 87, 46, 0.12);
+  color: var(--accent);
+}
+
+.icard-bookmark-btn.saved:hover {
+  background: rgba(228, 87, 46, 0.05);
+  color: var(--muted);
+}
+
+.icard-bookmark-btn:active { transform: scale(0.9); }
+
+/* ─── Search mode card ───────────────────────────────────────── */
+.icard.search-mode {
+  border-color: rgba(228, 87, 46, 0.18);
+  background: rgba(228, 87, 46, 0.02);
+}
+
+/* ─── Quick action bar ───────────────────────────────────────── */
+.icard-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0 2px;
+}
+
+.icard-quick-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  padding: 7px 14px;
+}
+
+/* Primary — Also Looking / Also Offering */
+.icard-quick-btn.primary {
+  flex: 1;
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(228, 87, 46, 0.3);
+}
+
+.icard-quick-btn.primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(228, 87, 46, 0.4);
+}
+
+.icard-quick-btn.primary:disabled {
+  background: rgba(228, 87, 46, 0.4);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Secondary — Message */
+.icard-quick-btn.secondary {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--border);
+  color: #c0c0c0;
+  padding: 7px 12px;
+}
+
+.icard-quick-btn.secondary:hover:not(:disabled) {
+  border-color: rgba(228, 87, 46, 0.4);
+  color: var(--accent);
+  background: rgba(228, 87, 46, 0.07);
+}
+
+/* Ghost — response count */
+.icard-quick-btn.ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted);
+  padding: 7px 10px;
+}
+
+.icard-quick-btn.ghost:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}

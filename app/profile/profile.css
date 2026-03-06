@@ -909,3 +909,77 @@
 }
 
 .profile-pw-toggle:hover { color: #ffffff; }
+
+/* ── Append to profile.css ── */
+
+/* ─── Tabs ───────────────────────────────────────────────────── */
+.profile-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 16px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px 10px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+
+.profile-tab:hover { color: #ffffff; }
+
+.profile-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.profile-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: rgba(228, 87, 46, 0.15);
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ─── Filter buttons ─────────────────────────────────────────── */
+.profile-mode-filter {
+  display: flex;
+  gap: 4px;
+}
+
+.profile-filter-btn {
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.profile-filter-btn.active {
+  background: rgba(228, 87, 46, 0.1);
+  border-color: rgba(228, 87, 46, 0.3);
+  color: var(--accent);
+}

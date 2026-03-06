@@ -85,3 +85,96 @@
   font-size: 13px;
   color: var(--muted);
 }
+
+
+/* ── Add to bottom of feed.css or globals.css ── */
+
+.feed-search-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  margin: 0;
+  background: rgba(228, 87, 46, 0.06);
+  border-bottom: 1px solid rgba(228, 87, 46, 0.15);
+}
+
+.feed-search-label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.feed-search-label strong {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.feed-search-count {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--subtle);
+}
+
+/* ── Append to feed.css ── */
+
+/* ─── Search result banner ───────────────────────────────────── */
+.feed-search-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(228, 87, 46, 0.05);
+  border-bottom: 1px solid rgba(228, 87, 46, 0.12);
+}
+
+.feed-search-label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.feed-search-label strong {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.feed-search-count {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--subtle);
+}
+
+/* ─── Empty state suggestion chips ──────────────────────────── */
+.feed-empty-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.feed-empty-chip {
+  padding: 7px 15px;
+  background: rgba(228, 87, 46, 0.08);
+  border: 1px solid rgba(228, 87, 46, 0.2);
+  border-radius: 20px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s, border-color 0.15s;
+}
+
+.feed-empty-chip:hover {
+  background: rgba(228, 87, 46, 0.16);
+  border-color: rgba(228, 87, 46, 0.4);
+  transform: scale(1.04);
+}

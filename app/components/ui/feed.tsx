@@ -14,21 +14,32 @@ export interface FeedItem {
   responseCount: number;
   mode: "looking" | "offering";
   username?: string;
-  userId?: string;   // ← owner's user_id for DM
+  userId?: string;
+  isBookmarked?: boolean;
 }
 
 interface FeedProps {
   items: FeedItem[];
   isLoading?: boolean;
+  searchMode?: boolean;      // ← activates quick action bar
+  emptyQuery?: string;       // ← for empty state messaging
+  popularCategories?: string[];
+  onCategoryClick?: (cat: string) => void;
 }
 
-export default function Feed({ items, isLoading = false }: FeedProps) {
+export default function Feed({
+  items,
+  isLoading = false,
+  searchMode = false,
+  emptyQuery = "",
+  popularCategories = [],
+  onCategoryClick,
+}: FeedProps) {
   const sortedItems = useMemo(() => {
-    return [...items].sort((a, b) => {
-      const aDate = a.createdAt ?? a.expiresAt;
-      const bDate = b.createdAt ?? b.expiresAt;
-      return new Date(bDate).getTime() - new Date(aDate).getTime();
-    });
+    return [...items].sort((a, b) =>
+      new Date(b.createdAt ?? b.expiresAt).getTime() -
+      new Date(a.createdAt ?? a.expiresAt).getTime()
+    );
   }, [items]);
 
   if (isLoading) {
@@ -48,8 +59,32 @@ export default function Feed({ items, isLoading = false }: FeedProps) {
       <section className="feed-section">
         <div className="feed-empty">
           <div className="feed-empty-icon">◎</div>
-          <p className="feed-empty-title">Nothing here yet.</p>
-          <p className="feed-empty-sub">Be the first to post an intent.</p>
+          {emptyQuery ? (
+            <>
+              <p className="feed-empty-title">
+                No results for &ldquo;{emptyQuery}&rdquo;
+              </p>
+              <p className="feed-empty-sub">Try a different keyword or explore these:</p>
+              {popularCategories.length > 0 && (
+                <div className="feed-empty-chips">
+                  {popularCategories.map(cat => (
+                    <button
+                      key={cat}
+                      className="feed-empty-chip"
+                      onClick={() => onCategoryClick?.(cat)}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="feed-empty-title">Nothing here yet.</p>
+              <p className="feed-empty-sub">Be the first to post an intent.</p>
+            </>
+          )}
         </div>
       </section>
     );
@@ -73,7 +108,9 @@ export default function Feed({ items, isLoading = false }: FeedProps) {
               responseCount={item.responseCount}
               username={item.username}
               mode={item.mode}
-              userId={item.userId}     // ← pass through
+              userId={item.userId}
+              isBookmarked={item.isBookmarked}
+              searchMode={searchMode}
             />
           </div>
         ))}

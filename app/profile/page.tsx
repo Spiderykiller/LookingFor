@@ -2,8 +2,8 @@
 
 import "./profile.css";
 import { useEffect, useState, useRef } from "react";
-import { MapPin, MessageCircle, Clock, Edit2, Plus, X, Check, Camera, Eye, EyeOff } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { MapPin, MessageCircle, Clock, Edit2, Plus, X, Check, Camera, Eye, EyeOff, Bookmark } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 
 type Mode = "LOOKING" | "OFFERING";
@@ -27,11 +27,16 @@ const CATEGORIES = [
 export default function ProfilePage() {
   const { data: session, status, update: updateSession } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [mode,        setMode]        = useState<Mode>("LOOKING");
+  const [activeTab,   setActiveTab]   = useState<"intents" | "bookmarks">(
+    searchParams.get("tab") === "bookmarks" ? "bookmarks" : "intents"
+  );
   const [user,        setUser]        = useState<any>(null);
   const [requests,    setRequests]    = useState<ActiveRequest[]>([]);
+  const [bookmarks,   setBookmarks]   = useState<any[]>([]);
   const [interests,   setInterests]   = useState<string[]>([]);
   const [stats,       setStats]       = useState<any>(null);
   const [loading,     setLoading]     = useState(true);
@@ -100,6 +105,12 @@ export default function ProfilePage() {
         if (data.user.current_mode) {
           setMode(data.user.current_mode === "offering" ? "OFFERING" : "LOOKING");
         }
+
+        // Fetch bookmarks
+        const bmRes  = await fetch("/api/bookmarks");
+        const bmData = await bmRes.json();
+        setBookmarks(Array.isArray(bmData) ? bmData : []);
+
       } catch (err) {
         console.error("Failed to load profile:", err);
       } finally {
@@ -133,12 +144,10 @@ export default function ProfilePage() {
     reader.onload = (ev) => {
       const img = new Image();
       img.onload = () => {
-        // Compress to max 200x200 via canvas
         const canvas = document.createElement("canvas");
         const size   = 200;
         canvas.width = size; canvas.height = size;
         const ctx = canvas.getContext("2d")!;
-        // Crop square from center
         const min  = Math.min(img.width, img.height);
         const sx   = (img.width  - min) / 2;
         const sy   = (img.height - min) / 2;
@@ -162,7 +171,7 @@ export default function ProfilePage() {
       });
       if (res.ok) {
         setUser((prev: any) => ({ ...prev, avatar_url: avatarPreview }));
-        await updateSession(); // refresh session so Navbar picks it up
+        await updateSession();
         setAvatarPreview(null);
       }
     } catch (err) {
@@ -577,45 +586,106 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Active Requests */}
-      <div className="profile-section">
-        <div className="profile-section-header">
-          <p className="profile-section-label">ACTIVE REQUESTS</p>
-          <span className="profile-section-count">{filteredRequests.length}</span>
-        </div>
-        <div className="profile-requests">
-          {filteredRequests.length === 0 ? (
-            <div className="profile-empty">
-              <p className="profile-empty-text">No active requests.</p>
-              <button className="profile-empty-cta" onClick={() => router.push("/post")}>
-                Post an intent →
-              </button>
-            </div>
-          ) : (
-            filteredRequests.map((req, i) => (
-              <div key={req.id} className="profile-request-card" style={{ animationDelay: `${i * 80}ms` }}>
-                <div className="profile-request-top">
-                  <span className="profile-request-label">
-                    {req.mode === "looking" ? "LOOKING FOR" : "OFFERING"} —
-                  </span>
-                  <span className={`profile-request-time${req.isUrgent ? " urgent" : ""}`}>
-                    <Clock size={11} strokeWidth={2} />
-                    {req.timeLeft}
-                  </span>
-                </div>
-                <p className="profile-request-statement">{req.statement}</p>
-                <div className="profile-request-footer">
-                  <span className="profile-request-category">{req.category}</span>
-                  <div className="profile-request-responses">
-                    <MessageCircle size={13} strokeWidth={2} />
-                    <span>{req.responses} responses</span>
+      {/* ── Tabs: My Intents / Saved ── */}
+      <div className="profile-tabs">
+        <button
+          className={`profile-tab${activeTab === "intents" ? " active" : ""}`}
+          onClick={() => setActiveTab("intents")}
+        >
+          My Intents
+        </button>
+        <button
+          className={`profile-tab${activeTab === "bookmarks" ? " active" : ""}`}
+          onClick={() => setActiveTab("bookmarks")}
+        >
+          <Bookmark size={13} />
+          Saved
+          {bookmarks.length > 0 && (
+            <span className="profile-tab-badge">{bookmarks.length}</span>
+          )}
+        </button>
+      </div>
+
+      {/* ── My Intents tab ── */}
+      {activeTab === "intents" && (
+        <div className="profile-section">
+          <div className="profile-section-header">
+            <p className="profile-section-label">ACTIVE REQUESTS</p>
+            <span className="profile-section-count">{filteredRequests.length}</span>
+          </div>
+          <div className="profile-requests">
+            {filteredRequests.length === 0 ? (
+              <div className="profile-empty">
+                <p className="profile-empty-text">No active requests.</p>
+                <button className="profile-empty-cta" onClick={() => router.push("/post")}>
+                  Post an intent →
+                </button>
+              </div>
+            ) : (
+              filteredRequests.map((req, i) => (
+                <div key={req.id} className="profile-request-card" style={{ animationDelay: `${i * 80}ms` }}>
+                  <div className="profile-request-top">
+                    <span className="profile-request-label">
+                      {req.mode === "looking" ? "LOOKING FOR" : "OFFERING"} —
+                    </span>
+                    <span className={`profile-request-time${req.isUrgent ? " urgent" : ""}`}>
+                      <Clock size={11} strokeWidth={2} />
+                      {req.timeLeft}
+                    </span>
+                  </div>
+                  <p className="profile-request-statement">{req.statement}</p>
+                  <div className="profile-request-footer">
+                    <span className="profile-request-category">{req.category}</span>
+                    <div className="profile-request-responses">
+                      <MessageCircle size={13} strokeWidth={2} />
+                      <span>{req.responses} responses</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* ── Saved / Bookmarks tab ── */}
+      {activeTab === "bookmarks" && (
+        <div className="profile-section">
+          <div className="profile-requests">
+            {bookmarks.length === 0 ? (
+              <div className="profile-empty">
+                <p className="profile-empty-text">No saved intents yet.</p>
+                <button className="profile-empty-cta" onClick={() => router.push("/")}>
+                  Browse the feed →
+                </button>
+              </div>
+            ) : (
+              bookmarks.map((bm, i) => (
+                <div key={bm.id} className="profile-request-card" style={{ animationDelay: `${i * 80}ms` }}>
+                  <div className="profile-request-top">
+                    <span className="profile-request-label">
+                      {bm.mode === "looking" ? "LOOKING FOR" : "OFFERING"} —
+                    </span>
+                    <span className="profile-request-label" style={{ color: "var(--muted)" }}>
+                      {bm.username}
+                    </span>
+                  </div>
+                  <p className="profile-request-statement">{bm.statement}</p>
+                  <div className="profile-request-footer">
+                    <span className="profile-request-category">
+                      {Array.isArray(bm.category) ? bm.category[0] : bm.category}
+                    </span>
+                    <div className="profile-request-responses">
+                      <MessageCircle size={13} strokeWidth={2} />
+                      <span>{bm.response_count} responses</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="profile-stats">

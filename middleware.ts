@@ -13,6 +13,8 @@ export default auth((req) => {
     nextUrl.pathname.startsWith("/api/signup") ||
     nextUrl.pathname.startsWith("/api/communities") ||
     nextUrl.pathname.startsWith("/api/conversations/unread") ||
+    nextUrl.pathname.startsWith("/api/conversations") ||
+    nextUrl.pathname.startsWith("/api/feed/popular") ||
     nextUrl.pathname.startsWith("/api/login");
 
   // If not logged in and trying to access a protected route → redirect to login
