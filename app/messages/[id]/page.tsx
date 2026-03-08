@@ -93,6 +93,7 @@ export default function ThreadPage({
   const [replyTo,     setReplyTo]     = useState<Message | null>(null);
   const [editingMsg,  setEditingMsg]  = useState<Message | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [editError,   setEditError]   = useState<string | null>(null);
   const [forwardMsg,  setForwardMsg]  = useState<Message | null>(null);
   const [infoMsg,     setInfoMsg]     = useState<Message | null>(null);
   const [showPinned,  setShowPinned]  = useState(false);
@@ -168,7 +169,6 @@ export default function ThreadPage({
       y = (e as React.MouseEvent).clientY;
     }
 
-    // Clamp so menu stays fully on screen
     x = Math.min(Math.max(x, 12), window.innerWidth  - 222);
     y = Math.min(Math.max(y, 12), window.innerHeight - 360);
 
@@ -282,26 +282,64 @@ export default function ThreadPage({
   /* ── Save edit ───────────────────────────────────────────────── */
   const saveEdit = async () => {
     if (!editingMsg || !editContent.trim()) return;
+
+    const trimmed     = editContent.trim();
+    const originalMsg = editingMsg; // capture before state clears
+
+    // Optimistic update — feels instant
+    setMessages(prev =>
+      prev.map(m =>
+        m.id === originalMsg.id
+          ? { ...m, content: trimmed, edited: true }
+          : m,
+      ),
+    );
+    setEditingMsg(null);
+    setEditContent("");
+    setEditError(null);
+
     try {
       const res = await fetch(
-        `/api/conversations/${convId}/messages/${editingMsg.id}`,
+        `/api/conversations/${convId}/messages/${originalMsg.id}`,
         {
           method:  "PATCH",
           headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({ action: "edit", content: editContent }),
+          body:    JSON.stringify({ action: "edit", content: trimmed }),
         },
       );
+
       if (res.ok) {
+        // Sync real edited_at timestamp from server
         const updated = await res.json();
         setMessages(prev =>
-          prev.map(m => m.id === editingMsg.id ? { ...m, ...updated } : m),
+          prev.map(m => m.id === originalMsg.id ? { ...m, ...updated } : m),
         );
+      } else {
+        // Revert + show server reason
+        const err = await res.json().catch(() => ({}));
+        const reason = err.error ?? "Edit failed";
+        setMessages(prev =>
+          prev.map(m =>
+            m.id === originalMsg.id
+              ? { ...m, content: originalMsg.content, edited: originalMsg.edited }
+              : m,
+          ),
+        );
+        setEditError(reason);
+        setTimeout(() => setEditError(null), 4000);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Network error — revert
+      setMessages(prev =>
+        prev.map(m =>
+          m.id === originalMsg.id
+            ? { ...m, content: originalMsg.content, edited: originalMsg.edited }
+            : m,
+        ),
+      );
+      setEditError("Network error — edit not saved");
+      setTimeout(() => setEditError(null), 4000);
     }
-    setEditingMsg(null);
-    setEditContent("");
   };
 
   /* ── Group by date ───────────────────────────────────────────── */
@@ -689,6 +727,14 @@ export default function ThreadPage({
         </div>
       )}
 
+      {/* ── Edit error toast ── */}
+      {editError && (
+        <div className="thread-edit-error">
+          <span>{editError}</span>
+          <button onClick={() => setEditError(null)}>✕</button>
+        </div>
+      )}
+
       {/* ── Edit bar ── */}
       {editingMsg && (
         <div className="thread-edit-bar">
@@ -716,6 +762,7 @@ export default function ThreadPage({
               className="thread-send-btn active"
               onClick={saveEdit}
               disabled={!editContent.trim()}
+              title="Save (Enter)"
             >
               <Check size={16} />
             </button>
@@ -725,6 +772,7 @@ export default function ThreadPage({
                 setEditingMsg(null);
                 setEditContent("");
               }}
+              title="Cancel (Esc)"
             >
               <X size={16} />
             </button>

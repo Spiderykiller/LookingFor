@@ -1484,3 +1484,39 @@
   transition: filter 0.15s;
 }
 .info-copy-btn:hover { filter: brightness(1.1); }
+
+
+
+.thread-edit-bar {
+  flex-shrink: 0;
+  background: var(--bg);
+  border-top: 1.5px solid rgba(228, 87, 46, 0.35);
+  padding: 10px 16px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+.thread-edit-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.thread-edited-label {
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+  margin-left: 4px;
+}
+
+.ctx-item-hint {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--subtle);
+  font-weight: 400;
+}
