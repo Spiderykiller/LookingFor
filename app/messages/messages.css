@@ -858,7 +858,7 @@
   background: var(--bg);
   border-top: 1.5px solid rgba(228, 87, 46, 0.35);
   padding: 12px 16px;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); /* clears fixed BottomNav h-16 */
 }
 
 .thread-edit-label {
@@ -882,7 +882,7 @@
   background: var(--bg);
   border-top: 1px solid var(--border);
   padding: 12px 16px;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); /* clears fixed BottomNav h-16 */
 }
 
 .thread-input-row {

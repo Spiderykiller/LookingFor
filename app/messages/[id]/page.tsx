@@ -63,10 +63,6 @@ function formatDateGroup(d: string) {
   });
 }
 
-function canEdit(createdAt: string) {
-  return Date.now() - new Date(createdAt).getTime() < 15 * 60 * 1000;
-}
-
 /* ── Component ────────────────────────────────────────────────── */
 export default function ThreadPage({
   params,
@@ -75,11 +71,12 @@ export default function ThreadPage({
 }) {
   const { data: session, status } = useSession();
   const router    = useRouter();
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const inputRef  = useRef<HTMLInputElement>(null);
-  const editRef   = useRef<HTMLInputElement>(null);
-  const pollRef   = useRef<ReturnType<typeof setInterval> | null>(null);
-  const menuRef   = useRef<HTMLDivElement>(null);
+  const bottomRef   = useRef<HTMLDivElement>(null);
+  const inputRef    = useRef<HTMLInputElement>(null);
+  const editRef     = useRef<HTMLInputElement>(null);
+  const pollRef     = useRef<ReturnType<typeof setInterval> | null>(null);
+  const menuRef     = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null); // scroll container
 
   const [convId,      setConvId]      = useState<string | null>(null);
   const [convo,       setConvo]       = useState<ConversationMeta | null>(null);
@@ -130,10 +127,18 @@ export default function ThreadPage({
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [convId, status, fetchMessages]);
 
+  // Only auto-scroll when the user is already near the bottom.
+  // This prevents polling from hijacking scroll position when reading history.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: messages.length < 5 ? "instant" : "smooth",
-    });
+    const el = messagesRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    const isNearBottom = distanceFromBottom < 150;
+    if (isNearBottom) {
+      bottomRef.current?.scrollIntoView({
+        behavior: messages.length < 5 ? "instant" : "smooth",
+      });
+    }
   }, [messages]);
 
   useEffect(() => { if (!loading) inputRef.current?.focus(); }, [loading]);
@@ -431,14 +436,12 @@ export default function ThreadPage({
                 <Info size={15} /> Message info
               </button>
 
-              {contextMenu.isMine &&
-                canEdit(contextMenu.msg.created_at) && (
+              {contextMenu.isMine && (
                   <button
                     className="ctx-item"
                     onClick={() => doAction("edit", contextMenu.msg)}
                   >
                     <Pencil size={15} /> Edit
-                    <span className="ctx-item-hint">15 min</span>
                   </button>
                 )}
 
@@ -535,7 +538,7 @@ export default function ThreadPage({
       )}
 
       {/* ── Messages ── */}
-      <div className="thread-messages">
+      <div className="thread-messages" ref={messagesRef}>
         {messages.length === 0 ? (
           <div className="thread-empty">
             <div className="thread-empty-avatar">
