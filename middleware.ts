@@ -11,12 +11,16 @@ export default auth((req) => {
     nextUrl.pathname.startsWith("/signup") ||
     nextUrl.pathname.startsWith("/api/auth") ||
     nextUrl.pathname.startsWith("/api/signup") ||
-    nextUrl.pathname.startsWith("/api/communities") ||
-    nextUrl.pathname.startsWith("/api/conversations/unread") ||
-    nextUrl.pathname.startsWith("/api/conversations") ||
-    nextUrl.pathname.startsWith("/api/feed/popular") ||
+    nextUrl.pathname.startsWith("/api/login") ||
     nextUrl.pathname.startsWith("/api/auth/mobile") ||
-    nextUrl.pathname.startsWith("/api/login");
+    // Feed is public — anyone can browse intents (same as web app)
+    nextUrl.pathname.startsWith("/api/feed") ||
+    // Intents GET is public; POST will check session inside the route handler
+    nextUrl.pathname.startsWith("/api/intents") ||
+    // Communities browsing is public
+    nextUrl.pathname.startsWith("/api/communities") ||
+    // Conversations/unread need to not redirect (they handle auth internally)
+    nextUrl.pathname.startsWith("/api/conversations");
 
   // If not logged in and trying to access a protected route → redirect to login
   if (!isLoggedIn && !isPublicRoute) {

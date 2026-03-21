@@ -12,13 +12,11 @@ export async function POST(req: NextRequest) {
     }
 
     const users = await sql`
-      SELECT id, username, email, password, location, current_mode
+      SELECT id, username, email, password
       FROM users
       WHERE email = ${email.trim().toLowerCase()}
       LIMIT 1
     `;
-    // NOTE: deliberately NOT selecting avatar_url — base64 images make the
-    // JWE token enormous (>13KB), which exceeds HTTP cookie/header size limits.
 
     const user = users[0];
     if (!user) return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
@@ -29,23 +27,22 @@ export async function POST(req: NextRequest) {
 
     const secret = process.env.AUTH_SECRET!;
 
-    // Salt must match the cookie name next-auth uses on Vercel (HTTPS)
-    const salt = "__Secure-next-auth.session-token";
+    // next-auth v5 beta uses "authjs" cookie names (not "next-auth")
+    // On Vercel HTTPS: __Secure-authjs.session-token
+    const salt = "__Secure-authjs.session-token";
 
-    // Keep payload minimal — only what next-auth needs to identify the user
     const token = await encode({
       token: {
         sub:   String(user.id),
         name:  user.username,
         email: user.email,
-        // NO picture/avatar — keeps token small
       },
       secret,
       salt,
       maxAge: 30 * 24 * 60 * 60,
     });
 
-    console.log(`[auth/mobile] token size: ${token.length} bytes`);
+    console.log(`[auth/mobile] token: ${token.length} bytes`);
 
     return NextResponse.json({
       token,
@@ -53,7 +50,7 @@ export async function POST(req: NextRequest) {
         id:    String(user.id),
         name:  user.username,
         email: user.email,
-        image: null,  // fetch avatar separately via /api/profile — not in JWT
+        image: null,
       },
     });
 
