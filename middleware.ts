@@ -1,42 +1,40 @@
 // middleware.ts
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { NextResponse } from "next/server";
 
-export default auth((req) => {
-  const { nextUrl, auth: session } = req;
-  const isLoggedIn = !!session?.user;
+export default async function middleware(req: NextRequest) {
+  const authHeader = req.headers.get("Authorization") ?? "";
 
-  const isPublicRoute =
-    nextUrl.pathname.startsWith("/login") ||
-    nextUrl.pathname.startsWith("/signup") ||
-    nextUrl.pathname.startsWith("/api/auth") ||
-    nextUrl.pathname.startsWith("/api/signup") ||
-    nextUrl.pathname.startsWith("/api/login") ||
-    nextUrl.pathname.startsWith("/api/auth/mobile") ||
-    // Feed is public — anyone can browse intents (same as web app)
-    nextUrl.pathname.startsWith("/api/feed") ||
-    // Intents GET is public; POST will check session inside the route handler
-    nextUrl.pathname.startsWith("/api/intents") ||
-    // Communities browsing is public
-    nextUrl.pathname.startsWith("/api/communities") ||
-    // Conversations/unread need to not redirect (they handle auth internally)
-    nextUrl.pathname.startsWith("/api/conversations");
+  if (authHeader.startsWith("Bearer ")) {
+    const token = authHeader.slice(7).trim();
 
-  // If not logged in and trying to access a protected route → redirect to login
-  if (!isLoggedIn && !isPublicRoute) {
-    return NextResponse.redirect(new URL("/login", nextUrl));
+    if (token) {
+      // Convert mobile Bearer token → authjs session cookie
+      // so all downstream API routes see a normal next-auth session
+      const newHeaders = new Headers(req.headers);
+      newHeaders.set(
+        "Cookie",
+        `__Secure-authjs.session-token=${token}; authjs.session-token=${token}`,
+      );
+      newHeaders.delete("Authorization");
+
+      const newReq = new NextRequest(req.url, {
+        method:  req.method,
+        headers: newHeaders,
+        body:    ["GET", "HEAD"].includes(req.method) ? undefined : req.body,
+        // @ts-ignore
+        duplex: "half",
+      });
+
+      // @ts-ignore
+      return (auth as any)(newReq);
+    }
   }
 
-  // If already logged in and trying to access login/signup → redirect to home
-  if (isLoggedIn && (nextUrl.pathname === "/login" || nextUrl.pathname === "/signup")) {
-    return NextResponse.redirect(new URL("/", nextUrl));
-  }
-
-  return NextResponse.next();
-});
+  // @ts-ignore
+  return (auth as any)(req);
+}
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|google-icon.svg).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|google-icon.svg).*)"],
 };
