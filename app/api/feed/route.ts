@@ -1,4 +1,3 @@
-// app/api/feed/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { sql } from "@/lib/db";
@@ -23,16 +22,17 @@ export async function GET(req: NextRequest) {
             i.created_at,
             i.expires_at,
             u.username,
-            COUNT(DISTINCT r.id) AS response_count,
-            -- Is this intent bookmarked by the current user?
-            BOOL_OR(b.user_id = ${userId}) AS is_bookmarked
+            COUNT(DISTINCT r.id)                        AS response_count,
+            BOOL_OR(b.user_id  = ${userId})             AS is_bookmarked,
+            BOOL_OR(rr.user_id = ${userId})             AS is_responded
           FROM intents i
-          JOIN users u ON i.user_id = u.id
-          LEFT JOIN responses r  ON r.intent_id = i.id
-          LEFT JOIN bookmarks b  ON b.intent_id = i.id AND b.user_id = ${userId}
+          JOIN users u    ON i.user_id   = u.id
+          LEFT JOIN responses r   ON r.intent_id  = i.id
+          LEFT JOIN bookmarks b   ON b.intent_id  = i.id AND b.user_id  = ${userId}
+          LEFT JOIN responses rr  ON rr.intent_id = i.id AND rr.user_id = ${userId}
           WHERE i.expires_at > NOW()
             AND (
-              i.statement  ILIKE ${'%' + q + '%'}
+              i.statement    ILIKE ${'%' + q + '%'}
               OR u.username  ILIKE ${'%' + q + '%'}
               OR i.location  ILIKE ${'%' + q + '%'}
               OR i.category::text ILIKE ${'%' + q + '%'}
@@ -54,12 +54,14 @@ export async function GET(req: NextRequest) {
             i.created_at,
             i.expires_at,
             u.username,
-            COUNT(DISTINCT r.id) AS response_count,
-            BOOL_OR(b.user_id = ${userId}) AS is_bookmarked
+            COUNT(DISTINCT r.id)                        AS response_count,
+            BOOL_OR(b.user_id  = ${userId})             AS is_bookmarked,
+            BOOL_OR(rr.user_id = ${userId})             AS is_responded
           FROM intents i
-          JOIN users u ON i.user_id = u.id
-          LEFT JOIN responses r  ON r.intent_id = i.id
-          LEFT JOIN bookmarks b  ON b.intent_id = i.id AND b.user_id = ${userId}
+          JOIN users u    ON i.user_id   = u.id
+          LEFT JOIN responses r   ON r.intent_id  = i.id
+          LEFT JOIN bookmarks b   ON b.intent_id  = i.id AND b.user_id  = ${userId}
+          LEFT JOIN responses rr  ON rr.intent_id = i.id AND rr.user_id = ${userId}
           WHERE i.expires_at > NOW()
           GROUP BY i.id, u.username
           ORDER BY i.created_at DESC
