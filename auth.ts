@@ -118,8 +118,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         nextUrl.pathname.startsWith("/api/auth/mobile") ||
         nextUrl.pathname.startsWith("/api/feed") ||
         nextUrl.pathname.startsWith("/api/intents") ||
+        nextUrl.pathname.startsWith("/api/responses") ||
         nextUrl.pathname.startsWith("/api/communities") ||
-        nextUrl.pathname.startsWith("/api/conversations");
+        nextUrl.pathname.startsWith("/api/conversations") ||
+        nextUrl.pathname.startsWith("/api/notifications");
 
       if (!isLoggedIn && !isPublic) {
         return NextResponse.redirect(new URL("/login", nextUrl));
@@ -132,6 +134,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
   },
-
   secret: process.env.AUTH_SECRET,
 });

@@ -154,7 +154,7 @@ export default function CommunityPage() {
           </div>
         </div>
       )}
-
+      
       {/* ── Header ── */}
       <div className="comm-header">
         <div className="comm-header-top">
