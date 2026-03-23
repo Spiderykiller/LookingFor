@@ -5,44 +5,41 @@ import { sql } from "@/lib/db";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await auth();
-  if (!session?.user?.id || String(session.user.id) !== params.id) {
+  if (!session?.user?.id || String(session.user.id) !== id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const rows = await sql`
-      SELECT settings FROM users WHERE id = ${params.id} LIMIT 1
+      SELECT settings FROM users WHERE id = ${id} LIMIT 1
     `;
-    const settings = rows[0]?.settings ?? {};
-    return NextResponse.json(settings);
-  } catch (err) {
-    console.error("[settings/GET]", err);
-    return NextResponse.json({}, { status: 200 }); // fail gracefully
+    return NextResponse.json(rows[0]?.settings ?? {});
+  } catch {
+    return NextResponse.json({});
   }
 }
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await auth();
-  if (!session?.user?.id || String(session.user.id) !== params.id) {
+  if (!session?.user?.id || String(session.user.id) !== id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const body = await req.json();
-
-    // Merge incoming settings with existing ones (JSONB merge)
     await sql`
       UPDATE users
       SET settings = COALESCE(settings, '{}') || ${JSON.stringify(body)}::jsonb
-      WHERE id = ${params.id}
+      WHERE id = ${id}
     `;
-
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[settings/PATCH]", err);
