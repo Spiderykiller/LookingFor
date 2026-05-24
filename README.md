@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Spiderykiller/LookingFor/public/logo.png" width="120" />
+<img src="https://raw.githubusercontent.com/Spiderykiller/LookingFor/blob/main/public/logo.png" width="120" />
 
 # LookingFor
 
@@ -53,14 +53,14 @@ The platform dynamically surfaces matching people and communities through live i
 
 ## Desktop Experience
 
-<img width="100%" src="https://raw.githubusercontent.com/Spiderykiller/LookingFor/assets/css/feed-preview.png" />
+<img width="100%" src="https://raw.githubusercontent.com/Spiderykiller/LookingFor/blob/main/assets/css/feed-preview.png" />
 
 ---
 
 ## Mobile Community View
 
 <div align="center">
-<img width="320" src="https://raw.githubusercontent.com/Spiderykiller/LookingFor/assets/css/community-mobile.png" />
+<img width="320" src="https://raw.githubusercontent.com/Spiderykiller/LookingFor/blob/main/assets/css/community-mobile.png" />
 </div>
 
 ---
@@ -68,7 +68,7 @@ The platform dynamically surfaces matching people and communities through live i
 ## Profile Experience
 
 <div align="center">
-<img width="320" src="https://raw.githubusercontent.com/Spiderykiller/LookingFor/assets/css/profile-preview.png" />
+<img width="320" src="https://raw.githubusercontent.com/Spiderykiller/LookingFor/blob/main/assets/css/profile-preview.png" />
 </div>
 
 ---
